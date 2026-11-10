@@ -1,0 +1,15 @@
+{
+  "name": "health-test",
+  "private": true,
+  "description": "10 天 / 21 天顾客健康教育课程：顾客注册、教练审核、每天解锁一课",
+  "cloudflare": {
+    "bindings": {
+      "ADMIN_PASSWORD": {
+        "description": "你的管理后台密码。请设一个你记得住、别人猜不到的密码，之后在「管理员入口」用它进入后台审核顾客。"
+      },
+      "DB": {
+        "description": "存放顾客和阅读进度的资料库，会自动建立，不用改。"
+      }
+    }
+  }
+}

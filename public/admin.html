@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/icon-admin-48.png"><link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-admin-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-admin-180.png"><link rel="manifest" href="/icons/admin.webmanifest"><meta name="theme-color" content="#1f6b54"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="21天管理"><title>健康营养课 · 管理后台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@900&display=swap">
+<style>
+/* Layout: admin console — header, status tabs with counts, searchable list of member cards with actions */
+:root{--bg:#eef3f0;--surface:#fff;--ink:#15302a;--muted:#5b6f69;--line:#d3dfda;--leaf:#1f6b54;--leaf-soft:#dcebe4;--sun:#e8892b;--sun-soft:#fbe9d6;--bad:#c4473a;--bad-soft:#f8e1dd;--water:#2f86c0;--water-soft:#dcecf7;
+  --display:"Noto Serif SC","Songti SC",serif;--body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root{--bg:#0f1a17;--surface:#16241f;--ink:#e3eee9;--muted:#9db1aa;--line:#2a3d36;--leaf:#6cc2a2;--leaf-soft:#1d3a30;--sun:#f0a35a;--sun-soft:#3a2a1a;--bad:#ef8a7c;--bad-soft:#3d2320;--water:#6db5e6;--water-soft:#1b3242;color-scheme:dark}}
+*{box-sizing:border-box} [hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
+.wrap{max-width:900px;margin:0 auto;padding-block:24px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--display);font-weight:900;font-size:26px;margin:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.top .links{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:var(--leaf);color:var(--surface)}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line)}
+.btn.warn{background:var(--bad)} .btn.sun{background:var(--sun)} .btn.blue{background:var(--water)}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.login{max-width:380px;margin:10vh auto 0;display:flex;flex-direction:column;gap:10px}
+input{font:inherit;font-size:16px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
+.err{color:var(--bad);font-size:14px;min-height:1.2em;margin:0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:6px 12px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tab.on{background:var(--leaf);border-color:var(--leaf);color:var(--surface)}
+.tab em{font-style:normal;font-size:12px;background:var(--bg);color:var(--ink);border-radius:99px;padding:0 7px;font-variant-numeric:tabular-nums}
+.tab.on em{background:rgba(255,255,255,.25);color:var(--surface)}
+.tab.alert em{background:var(--bad);color:#fff}
+.list{display:flex;flex-direction:column;gap:10px}
+.u{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;border-left:5px solid var(--line)}
+.u.pending,.u.renew_requested{border-left-color:var(--sun)} .u.approved{border-left-color:var(--leaf)} .u.rejected,.u.disabled,.u.expired{border-left-color:var(--bad)}
+.u-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.u-name{font-weight:700;font-size:16px} .u-phone{color:var(--muted);font-variant-numeric:tabular-nums;margin-left:8px}
+.pill{font-size:12px;font-weight:700;border-radius:99px;padding:2px 10px;white-space:nowrap}
+.pill.pending,.pill.renew_requested{background:var(--sun-soft);color:var(--sun)} .pill.approved{background:var(--leaf-soft);color:var(--leaf)}
+.pill.rejected,.pill.disabled,.pill.expired{background:var(--bad-soft);color:var(--bad)} .pill.done{background:var(--water-soft);color:var(--water)}
+.meta{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.prog{display:flex;align-items:center;gap:8px;font-size:13px}
+.bar{flex:1;max-width:260px;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--leaf)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.confirm{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;background:var(--bad-soft);border-radius:8px;padding:6px 8px}
+.empty{color:var(--muted);text-align:center;padding:30px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:14px;z-index:9}
+.help{font-size:13px;color:var(--muted)}
+.sec{display:flex;flex-direction:column;gap:16px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px;max-width:420px}
+.seg button{font:inherit;font-weight:700;border:0;border-radius:9px;padding:9px;background:transparent;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--leaf);color:var(--surface)}
+.pill.c10{background:var(--sun);color:#fff} .pill.c21{background:var(--leaf);color:var(--surface)}
+.course{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted)}
+.alertbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--sun);color:#fff;border-radius:12px;padding:12px 14px;font-weight:700}
+.alertbar .btn{background:#fff;color:var(--sun)}
+.access{display:flex;flex-direction:column;gap:8px;background:var(--bg);border-radius:10px;padding:10px 12px;font-size:14px}
+.access .presets{display:flex;gap:6px;flex-wrap:wrap}
+.access input{width:64px;padding:5px 8px;font:inherit;font-size:14px;border:1.5px solid var(--line);border-radius:8px}
+.access small{color:var(--muted)}
+.notify{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1.5px dashed var(--sun);border-radius:12px;padding:10px 14px;font-size:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.kpi b{font-family:var(--display);font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--leaf)}
+.kpi span{font-size:14px;font-weight:700} .kpi small{font-size:12px;color:var(--muted)}
+.st-h{font-weight:700;font-size:16px;margin:4px 0 -4px}
+.rows{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:minmax(70px,auto) 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row:last-child{border-bottom:0}
+.row .lb{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.row .tr{height:10px;background:var(--bg);border-radius:5px;overflow:hidden;min-width:40px}.row .tr i{display:block;height:100%;background:var(--leaf);border-radius:5px}
+.row .vl{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.row .vl em{font-style:normal;color:var(--muted);font-size:12px;margin-left:6px}
+.ppl{display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.ppl .hd{color:var(--muted);font-size:12px;font-weight:700}
+.ppl .num{text-align:right;font-variant-numeric:tabular-nums}
+.ppl small{display:block;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap" id="loginView" hidden>
+  <form class="card login" id="lf">
+    <h1>管理后台</h1>
+    <label for="apw">管理员密码</label>
+    <input id="apw" type="password" autocomplete="current-password">
+    <p class="err" id="lerr" role="alert"></p>
+    <button class="btn" type="submit">登录</button>
+  </form>
+</div>
+
+<div class="wrap" id="mainView" hidden>
+  <div class="top">
+    <h1>健康营养课 · 管理后台</h1>
+    <div class="links">
+      <a class="btn ghost sm" href="/">21天顾客页面</a><a class="btn ghost sm" href="/10">10天顾客页面</a>
+      <a class="btn ghost sm" href="/?preview=1">预览 21 天</a><a class="btn ghost sm" href="/10?preview=1">预览 10 天</a>
+      <button class="btn ghost sm" id="refresh" type="button">刷新</button>
+      <button class="btn ghost sm" id="out" type="button">登出</button>
+    </div>
+  </div>
+  <div class="seg" id="seg"><button type="button" class="on" data-s="users">学员管理</button><button type="button" data-s="stats">浏览统计</button></div>
+  <div class="alertbar" id="alertBar" hidden></div>
+  <div class="notify" id="notifyBox" hidden><span>有人申请时，用通知提醒你（这个后台页面要开着，或放在背景）。</span><button class="btn sm" type="button" id="notifyBtn">开启通知</button></div>
+  <div class="sec" id="secUsers">
+  <p class="help">顾客注册后会出现在「待审核」，批准后才能开始上课。从 21 天网址注册的是 21 天课程，从 10 天网址（/10）注册的是 10 天课程。按「设定课程」可以改他能看到第几天、从第几天开始（例如 10 天读完的顾客，直接从第 11 天接着看）。完成课程后可以回看 7 天，之后自动关闭；顾客申请重新开通会出现在「申请重开」。</p>
+  <div class="course" id="courseF"><span>课程：</span><button type="button" class="tab on" data-c="0">全部</button><button type="button" class="tab" data-c="21">21 天</button><button type="button" class="tab" data-c="10">10 天</button></div>
+  <div class="tabs" id="tabs"></div>
+  <input id="q" type="search" placeholder="搜索名字或电话">
+  <div class="list" id="list"></div>
+  </div>
+  <div class="sec" id="secStats" hidden>
+    <div class="tabs" id="range">
+      <button type="button" class="tab" data-d="1">今天</button><button type="button" class="tab on" data-d="7">最近 7 天</button>
+      <button type="button" class="tab" data-d="30">最近 30 天</button><button type="button" class="tab" data-d="0">全部</button>
+    </div>
+    <div id="stats"><div class="empty">载入中…</div></div>
+    <p class="help">「打开次数」：网站被打开的次数（管理员预览不算）。「浏览人数」：不同的人数，登录学员按账号算，没登录的访客按手机/电脑算。「课程浏览」：学员打开某一天课程的次数。统计从这个功能上线后开始。</p>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+let TOKEN = null; try{ TOKEN = localStorage.getItem("h21_admin"); }catch(e){}
+let USERS = [], TAB = "pending", COURSE = 0;
+const cdays = u => (u.course>=1 && u.course<=21) ? u.course : 21;
+const cgroup = u => cdays(u)<=10 ? 10 : 21;
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = iso => { if(!iso) return "—"; const d = new Date(Date.parse(iso)+8*3600e3); return d.getUTCFullYear()+"-"+String(d.getUTCMonth()+1).padStart(2,"0")+"-"+String(d.getUTCDate()).padStart(2,"0")+" "+String(d.getUTCHours()).padStart(2,"0")+":"+String(d.getUTCMinutes()).padStart(2,"0"); };
+function toast(m){ const t = document.getElementById("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(()=>t.hidden=true, 2200); }
+async function api(path, opts={}){
+  const r = await fetch("/api"+path, {method:opts.method||"GET", headers:Object.assign({"content-type":"application/json"}, TOKEN?{authorization:"Bearer "+TOKEN}:{}), body: opts.body?JSON.stringify(opts.body):undefined});
+  let d = {}; try{ d = await r.json(); }catch(e){}
+  if(!r.ok){ const e = new Error(d.error||"网络出错"); e.status = r.status; throw e; }
+  return d;
+}
+const STATUS = {pending:"待审核",approved:"上课中",renew_requested:"申请重开",rejected:"未通过",disabled:"已停用"};
+function view(u){ if(u.status==="approved" && u.expired) return "expired"; if(u.status==="approved" && u.doneCount>=cdays(u)) return "done"; return u.status; }
+const LABEL = {pending:"待审核",approved:"上课中",done:"已完成 · 回看中",expired:"已到期",renew_requested:"申请重开",rejected:"未通过",disabled:"已停用"};
+const TABS = [["pending","待审核",["pending"]],["renew_requested","申请重开",["renew_requested"]],["approved","上课中",["approved"]],["done","回看中",["done"]],["expired","已到期",["expired"]],["closed","未通过 / 停用",["rejected","disabled"]],["all","全部",null]];
+
+function showLogin(msg){ document.getElementById("mainView").hidden = true; document.getElementById("loginView").hidden = false; document.getElementById("lerr").textContent = msg||""; }
+document.getElementById("lf").onsubmit = async e=>{
+  e.preventDefault();
+  try{ const d = await api("/admin/login",{method:"POST",body:{password:document.getElementById("apw").value}}); TOKEN = d.token; try{ localStorage.setItem("h21_admin", TOKEN); }catch(_){} load(); }
+  catch(x){ document.getElementById("lerr").textContent = x.message; }
+};
+document.getElementById("out").onclick = ()=>{ api("/logout",{method:"POST"}).catch(()=>{}); try{ localStorage.removeItem("h21_admin"); }catch(e){} TOKEN = null; showLogin(); };
+let SEC = "users", RANGE = 7;
+document.getElementById("refresh").onclick = ()=> SEC==="stats" ? loadStats() : load();
+document.querySelectorAll("#seg [data-s]").forEach(b=>b.onclick = ()=>{
+  SEC = b.dataset.s; document.querySelectorAll("#seg [data-s]").forEach(x=>x.classList.toggle("on", x===b));
+  document.getElementById("secUsers").hidden = SEC!=="users"; document.getElementById("secStats").hidden = SEC!=="stats";
+  if(SEC==="stats") loadStats();
+});
+document.querySelectorAll("#range [data-d]").forEach(b=>b.onclick = ()=>{
+  RANGE = +b.dataset.d; document.querySelectorAll("#range [data-d]").forEach(x=>x.classList.toggle("on", x===b)); loadStats();
+});
+async function loadStats(){
+  const box = document.getElementById("stats");
+  try{ renderStats(await api("/admin/stats?days="+RANGE)); }
+  catch(e){ if(e.status===401||e.status===403){ showLogin("请重新登录"); } else box.innerHTML = '<div class="empty">'+esc(e.message)+'</div>'; }
+}
+function renderStats(d){
+  const o = d.opens||{}, l = d.lessons||{}, n = v => Number(v||0).toLocaleString("en");
+  const kpi = (v,t,s)=>'<div class="kpi"><b>'+n(v)+'</b><span>'+t+'</span><small>'+s+'</small></div>';
+  let h = '<div class="kpis">'+
+    kpi(o.visitors,"浏览人数","其中登录学员 "+n(o.members)+" 人，未登录访客 "+n(o.guests)+" 人")+
+    kpi(o.opens,"打开次数","网站被打开的总次数")+
+    kpi(l.views,"课程浏览次数","打开某一天课程的总次数")+
+    kpi(l.readers,"看课的学员","至少打开过一天课程的人数")+'</div>';
+  const daily = (d.daily||[]).slice().reverse(), maxD = Math.max(1, ...daily.map(x=>x.opens||0));
+  h += '<div class="st-h">每天</div>';
+  h += daily.length ? '<div class="rows">'+daily.slice().reverse().map(x=>'<div class="row"><span class="lb">'+x.date.slice(5)+'</span><div class="tr"><i style="width:'+(100*(x.opens||0)/maxD)+'%"></i></div><span class="vl">'+n(x.visitors)+' 人 · '+n(x.opens)+' 次<em>课程 '+n(x.views)+'</em></span></div>').join("")+'</div>' : '<div class="empty">还没有资料</div>';
+  const by = {}; (d.byDay||[]).forEach(x=>by[x.day]=x); const maxV = Math.max(1, ...Object.values(by).map(x=>x.views));
+  h += '<div class="st-h">21 天课程，每一天的浏览</div><div class="rows">';
+  for(let i=1;i<=21;i++){ const x = by[i]||{views:0,readers:0}; h += '<div class="row"><span class="lb">第 '+i+' 天</span><div class="tr"><i style="width:'+(100*x.views/maxV)+'%"></i></div><span class="vl">'+n(x.readers)+' 人 · '+n(x.views)+' 次</span></div>'; }
+  h += '</div>';
+  const ppl = d.people||[];
+  h += '<div class="st-h">学员浏览排行</div>';
+  h += ppl.length ? '<div class="ppl"><span class="hd">学员</span><span class="hd num">打开</span><span class="hd num">课程</span>'+ppl.map(p=>'<span>'+esc(p.name)+'<small>'+esc(p.phone)+' · 最后 '+fmt(p.last)+'</small></span><span class="num">'+n(p.opens)+'</span><span class="num">'+n(p.views)+'</span>').join("")+'</div>' : '<div class="empty">还没有学员浏览</div>';
+  document.getElementById("stats").innerHTML = h;
+}
+document.getElementById("q").oninput = render;
+
+async function load(){
+  if(!TOKEN){ showLogin(); return; }
+  try{ const d = await api("/admin/users"); USERS = d.users; document.getElementById("loginView").hidden = true; document.getElementById("mainView").hidden = false; render(); checkNew(); }
+  catch(e){ if(e.status===401||e.status===403){ try{ localStorage.removeItem("h21_admin"); }catch(_){} TOKEN = null; showLogin("请重新登录"); } else toast(e.message); }
+}
+function render(){
+  const tabs = document.getElementById("tabs"), POOL = USERS.filter(u=>!COURSE || cgroup(u)===COURSE);
+  tabs.innerHTML = TABS.map(([k,l,st])=>{ const n = POOL.filter(u=>!st||st.includes(view(u))).length; const alert = (k==="pending"||k==="renew_requested") && n>0; return '<button type="button" class="tab'+(TAB===k?' on':'')+(alert?' alert':'')+'" data-t="'+k+'">'+l+'<em>'+n+'</em></button>'; }).join("");
+  tabs.querySelectorAll("[data-t]").forEach(b=>b.onclick = ()=>{ TAB = b.dataset.t; render(); });
+  const st = TABS.find(t=>t[0]===TAB)[2], q = document.getElementById("q").value.trim().toLowerCase();
+  const rows = POOL.filter(u=>(!st||st.includes(view(u))) && (!q || u.name.toLowerCase().includes(q) || u.phone.includes(q)));
+  const list = document.getElementById("list");
+  if(!rows.length){ list.innerHTML = '<div class="empty">这里暂时没有人</div>'; return; }
+  list.innerHTML = rows.map(u=>{
+    const v = view(u);
+    let acts = "";
+    if(u.status==="pending") acts = btn(u,"approve","批准","") + btn(u,"reject","不通过","warn");
+    else if(u.status==="renew_requested") acts = btn(u,"extend7","再开 7 天回看","") + btn(u,"restart","从第 1 天重新开始","blue") + btn(u,"reject","不批准","warn");
+    else if(u.status==="approved") acts = (v==="expired"||v==="done" ? btn(u,"extend7","再开 7 天","") + btn(u,"restart","重新开始 "+cdays(u)+" 天","blue") : "") + btn(u,"logout","强制登出","ghost") + btn(u,"disable","停用","warn");
+    else acts = btn(u,"approve","重新批准","");
+    acts += (u.fullAccess ? btn(u,"full_off","取消教练权限","ghost") : btn(u,"full_on","给教练权限（看全部 "+cdays(u)+" 天）","blue"));
+    acts += btn(u,"access","设定课程（看几天 / 从第几天开始）","blue");
+    acts += btn(u,"resetpw","重设密码","ghost") + btn(u,"delete","删除","ghost");
+    return '<div class="u '+v+'" data-id="'+u.id+'"><div class="u-top"><div><span class="u-name">'+esc(u.name)+'</span><span class="u-phone">'+esc(u.phone)+'</span></div><span><span class="pill c'+cgroup(u)+'" style="margin-right:6px">'+(cdays(u)===10||cdays(u)===21 ? cdays(u)+' 天课程' : '开放到第 '+cdays(u)+' 天')+'</span><span class="pill '+v+'">'+LABEL[v]+'</span></span>'+(u.fullAccess?'<span class="pill approved" style="margin-left:6px">教练 · 全部开放</span>':'')+'</div>'+
+      '<div class="prog"><span>进度 '+u.doneCount+' / '+cdays(u)+'</span><div class="bar"><i style="width:'+Math.min(100,u.doneCount/cdays(u)*100)+'%"></i></div></div>'+
+      '<div class="meta"><span>注册：'+fmt(u.createdAt)+'</span><span>批准：'+fmt(u.approvedAt)+'</span><span>最后登录：'+fmt(u.lastLogin)+'</span>'+(u.accessUntil?'<span>可看到：'+fmt(u.accessUntil)+'</span>':'')+(u.renewCount?'<span>重开次数：'+u.renewCount+'</span>':'')+'</div>'+
+      '<div class="acts">'+acts+'</div><div class="slot"></div></div>';
+  }).join("");
+  list.querySelectorAll("[data-a]").forEach(b=>b.onclick = ()=>act(+b.closest(".u").dataset.id, b.dataset.a, b.closest(".u")));
+}
+function btn(u,a,l,cls){ return '<button type="button" class="btn sm '+cls+'" data-a="'+a+'">'+l+'</button>'; }
+async function act(id, a, card){
+  const slot = card.querySelector(".slot");
+  const run = async (extra={})=>{ try{ await api("/admin/action",{method:"POST",body:Object.assign({id,action:a},extra)}); toast("已完成"); load(); }catch(e){ toast(e.message); } };
+  if(a==="resetpw"){
+    slot.innerHTML = '<div class="confirm"><span>新密码：</span><input id="np'+id+'" type="text" style="width:160px;padding:6px 8px;font-size:14px"><button class="btn sm" type="button" id="ok'+id+'">确定</button><button class="btn sm ghost" type="button" id="no'+id+'">取消</button></div>';
+    document.getElementById("ok"+id).onclick = ()=>run({password:document.getElementById("np"+id).value});
+    document.getElementById("no"+id).onclick = ()=>slot.innerHTML = "";
+    return;
+  }
+  if(a==="access"){
+    const u = USERS.find(x=>x.id===id), next = Math.min(21, (u.doneCount||0)+1);
+    slot.innerHTML = '<div class="access"><b>设定 '+esc(u.name)+' 的课程</b>'+
+      '<div class="presets">'+
+        '<button type="button" class="btn sm ghost" data-p="10,">10 天课程（保留进度）</button>'+
+        '<button type="button" class="btn sm ghost" data-p="21,">21 天课程（保留进度）</button>'+
+        '<button type="button" class="btn sm ghost" data-p="21,11">21 天 · 从第 11 天开始</button>'+
+      '</div>'+
+      '<label>可以看到第 <input type="number" min="1" max="21" id="ad'+id+'" value="'+cdays(u)+'"> 天</label>'+
+      '<label>从第 <input type="number" min="1" max="21" id="as'+id+'" placeholder="'+next+'"> 天开始 <small>（空白 = 保留现在的进度；填 1 = 从头开始）</small></label>'+
+      '<p class="help">开始那天以前的天数会算作已读，开始那天今天就能看。设定后账号会是「上课中」。</p>'+
+      '<div class="confirm"><button class="btn sm" type="button" id="ok'+id+'">确定</button><button class="btn sm ghost" type="button" id="no'+id+'">取消</button></div></div>';
+    slot.querySelectorAll("[data-p]").forEach(b=>b.onclick = ()=>{ const [d,st] = b.dataset.p.split(","); document.getElementById("ad"+id).value = d; document.getElementById("as"+id).value = st; });
+    document.getElementById("ok"+id).onclick = ()=>run({days:document.getElementById("ad"+id).value, start:document.getElementById("as"+id).value});
+    document.getElementById("no"+id).onclick = ()=>slot.innerHTML = "";
+    return;
+  }
+  if(a==="delete"||a==="restart"||a==="disable"){
+    const msg = {delete:"确定永久删除这个用户？进度会一起删除。",restart:"确定清除进度，让他从第 1 天重新开始？",disable:"确定停用？他会马上被登出。"}[a];
+    slot.innerHTML = '<div class="confirm"><span>'+msg+'</span><button class="btn sm warn" type="button" id="ok'+id+'">确定</button><button class="btn sm ghost" type="button" id="no'+id+'">取消</button></div>';
+    document.getElementById("ok"+id).onclick = ()=>run();
+    document.getElementById("no"+id).onclick = ()=>slot.innerHTML = "";
+    return;
+  }
+  run();
+}
+document.querySelectorAll("#courseF [data-c]").forEach(b=>b.onclick = ()=>{
+  COURSE = +b.dataset.c; document.querySelectorAll("#courseF [data-c]").forEach(x=>x.classList.toggle("on", x===b)); render();
+});
+
+/* ---------- new-application alerts ----------
+   Every 30 s (also while the tab is in the background) the list is reloaded. Anyone waiting who wasn't
+   seen before triggers: an orange bar here, a short sound, the waiting count in the tab title, and a
+   phone/computer notification once the admin has allowed it. Seen ids are kept on this device. */
+const SEEN_KEY = "h21_seen_waiting2"; // entries are "id:status", so a later renewal request alerts again
+let SEEN = null; try{ const v = localStorage.getItem(SEEN_KEY); if(v) SEEN = new Set(JSON.parse(v)); }catch(e){}
+let AUDIO = null;
+document.addEventListener("click", ()=>{ try{ if(!AUDIO) AUDIO = new (window.AudioContext||window.webkitAudioContext)(); if(AUDIO.state==="suspended") AUDIO.resume(); }catch(e){} }, {capture:true});
+function ding(){ try{ if(!AUDIO) return; const t = AUDIO.currentTime; [[880,0],[1175,.18]].forEach(([f,d])=>{ const o = AUDIO.createOscillator(), g = AUDIO.createGain(); o.frequency.value = f; o.connect(g); g.connect(AUDIO.destination); g.gain.setValueAtTime(.0001,t+d); g.gain.exponentialRampToValueAtTime(.25,t+d+.02); g.gain.exponentialRampToValueAtTime(.0001,t+d+.35); o.start(t+d); o.stop(t+d+.4); }); }catch(e){} }
+const SW = ("serviceWorker" in navigator) ? navigator.serviceWorker.register("/admin-sw.js", {scope:"/admin"}).catch(()=>null) : Promise.resolve(null);
+async function notify(title, body){
+  if(!("Notification" in window) || Notification.permission!=="granted") return;
+  try{ const reg = await SW; if(reg && reg.showNotification){ await reg.showNotification(title, {body, tag:"h21-new", renotify:true, icon:"/icons/icon-admin-192.png"}); return; } }catch(e){}
+  try{ new Notification(title, {body, icon:"/icons/icon-admin-192.png"}); }catch(e){}
+}
+function notifyBox(){
+  const box = document.getElementById("notifyBox");
+  box.hidden = !("Notification" in window) || Notification.permission==="granted" || Notification.permission==="denied";
+}
+document.getElementById("notifyBtn").onclick = async ()=>{ try{ await Notification.requestPermission(); }catch(e){} notifyBox(); if(Notification.permission==="granted") notify("通知已开启", "有人申请时会在这里提醒你。"); };
+function checkNew(){
+  const waiting = USERS.filter(u=>u.status==="pending" || u.status==="renew_requested");
+  document.title = (waiting.length ? "("+waiting.length+") " : "") + "健康营养课 · 管理后台";
+  notifyBox();
+  const key = u => u.id+":"+u.status;
+  if(SEEN===null){ SEEN = new Set(waiting.map(key)); try{ localStorage.setItem(SEEN_KEY, JSON.stringify([...SEEN])); }catch(e){} return; }
+  const fresh = waiting.filter(u=>!SEEN.has(key(u)));
+  if(!fresh.length) return;
+  fresh.forEach(u=>SEEN.add(key(u))); try{ localStorage.setItem(SEEN_KEY, JSON.stringify([...SEEN].slice(-500))); }catch(e){}
+  const who = fresh.map(u=>u.name+"（"+cdays(u)+"天"+(u.status==="renew_requested"?" · 申请重开":"")+"）").join("、");
+  const bar = document.getElementById("alertBar");
+  bar.innerHTML = '<span>🔔 新申请：'+esc(who)+'</span><button class="btn sm" type="button" id="seeNew">去审核</button><button class="btn sm ghost" type="button" id="hideNew">知道了</button>';
+  bar.hidden = false;
+  document.getElementById("seeNew").onclick = ()=>{ TAB = fresh[0].status==="renew_requested" ? "renew_requested" : "pending"; COURSE = 0; document.querySelectorAll("#courseF [data-c]").forEach(x=>x.classList.toggle("on", x.dataset.c==="0")); bar.hidden = true; render(); document.getElementById("tabs").scrollIntoView({behavior:"smooth"}); };
+  document.getElementById("hideNew").onclick = ()=>{ bar.hidden = true; };
+  ding();
+  notify(fresh.length===1 ? "新申请：" + fresh[0].name : fresh.length + " 个新申请", who + " 等你审核");
+}
+load();
+setInterval(()=>{ if(TOKEN) load(); }, 30000);
+</script>
+</body>
+</html>

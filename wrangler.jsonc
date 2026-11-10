@@ -1,0 +1,11 @@
+{
+  // 健康营养课 —— 10 天 / 21 天顾客健康教育课程
+  "name": "health-test",
+  "main": "worker.js",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "health-course-db", "database_id": "d8fc0550-c939-4e02-b52a-4aa20f7d9440" }
+  ],
+  "observability": { "enabled": true }
+}

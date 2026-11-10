@@ -1,0 +1,1344 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><link rel="icon" type="image/png" sizes="48x48" href="/icons/icon-user-48.png"><link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-user-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-user-180.png"><link rel="manifest" href="/icons/user.webmanifest"><meta name="theme-color" content="#1f6b54"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="21天课程"><title>21天健康营养课</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@700;900&display=swap">
+<style>
+/* ===== src/app/css/1-base.css ===== */
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+/* Layout: one phone-width column — progress header, 3×7 calendar of days, then the day's lesson card with charts and class slides */
+:root{
+  --bg:#eef3f0; --surface:#ffffff; --ink:#15302a; --muted:#5b6f69; --line:#d3dfda;
+  --leaf:#1f6b54; --leaf-soft:#dcebe4; --sun:#e8892b; --sun-soft:#fbe9d6; --lock:#c3cfca;
+  --bad:#c4473a; --bad-soft:#f8e1dd; --mid:#e3b23c; --water:#2f86c0; --water-soft:#dcecf7; --tissue:#e39b93;
+  --display:"Noto Serif SC","Songti SC","STSong",serif;
+  --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1a17; --surface:#16241f; --ink:#e3eee9; --muted:#9db1aa; --line:#2a3d36;
+  --leaf:#6cc2a2; --leaf-soft:#1d3a30; --sun:#f0a35a; --sun-soft:#3a2a1a; --lock:#3a4b45;
+  --bad:#ef8a7c; --bad-soft:#3d2320; --mid:#e8c160; --water:#6db5e6; --water-soft:#1b3242; --tissue:#c47d76; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1a17; --surface:#16241f; --ink:#e3eee9; --muted:#9db1aa; --line:#2a3d36;
+  --leaf:#6cc2a2; --leaf-soft:#1d3a30; --sun:#f0a35a; --sun-soft:#3a2a1a; --lock:#3a4b45;
+  --bad:#ef8a7c; --bad-soft:#3d2320; --mid:#e8c160; --water:#6db5e6; --water-soft:#1b3242; --tissue:#c47d76; color-scheme:dark}
+*{box-sizing:border-box} [hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75}
+.wrap{max-width:680px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.3}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--leaf);font-weight:700}
+header{display:flex;flex-direction:column;gap:10px}
+header h1{font-size:clamp(28px,7vw,40px);font-weight:900}
+header p{color:var(--muted)}
+.prog{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.prog-num{font-family:var(--display);font-size:22px;font-weight:900;font-variant-numeric:tabular-nums}
+.prog-num small{font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted)}
+.bar{flex:1;min-width:160px;display:grid;grid-template-columns:repeat(21,1fr);gap:3px}
+.bar i{height:8px;border-radius:2px;background:var(--line)}
+.bar i.on{background:var(--leaf)}
+.status{background:var(--sun-soft);border-radius:10px;padding:10px 14px;font-size:14px}
+.status b{font-variant-numeric:tabular-nums;color:var(--sun)}
+.cal{display:flex;flex-direction:column;gap:10px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.week-label{font-size:12px;color:var(--muted);letter-spacing:.08em;display:flex;justify-content:space-between;gap:8px}
+.tile{aspect-ratio:1;max-width:100%;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;font:inherit;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0}
+.tile .n{font-family:var(--display);font-weight:900;font-size:clamp(15px,4.4vw,20px);line-height:1}
+.tile .s{font-size:10px;color:var(--muted);line-height:1.5;display:flex;align-items:center;height:15px}
+.tile .s svg{width:11px;height:11px}
+.tile.done{background:var(--leaf);border-color:var(--leaf);color:var(--surface)}
+.tile.done .s{color:var(--surface);opacity:.85}
+.tile.today{border-color:var(--sun);border-width:2.5px;background:var(--sun-soft)}
+.tile.today .s{color:var(--sun);font-weight:700}
+.tile.locked{background:transparent;border-style:dashed;color:var(--lock);cursor:not-allowed}
+.tile.locked .s{color:var(--lock)}
+.tile.preview{cursor:pointer;color:var(--muted)}
+.tile.sel{outline:3px solid var(--ink);outline-offset:2px}
+.tile:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+
+/* ===== src/app/css/2-lesson.css ===== */
+.lesson{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px clamp(16px,5vw,32px) 28px;display:flex;flex-direction:column;gap:22px;min-width:0}
+.lesson-head{display:flex;flex-direction:column;gap:6px}
+.daytag{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.daytag .d{font-family:var(--display);font-weight:900;color:var(--sun);font-size:15px}
+.chip{background:var(--leaf-soft);color:var(--leaf);border-radius:99px;padding:1px 10px;font-size:12px;font-weight:700}
+.lesson h2{font-size:clamp(24px,6vw,32px);font-weight:900}
+.lesson .en{color:var(--muted);font-size:13px}
+.lead{font-size:18px;font-weight:700;font-family:var(--display);line-height:1.55}
+.intro{color:var(--ink)}
+.sec{display:flex;flex-direction:column;gap:12px}
+.sec h3{font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px}
+.sec h3::before{content:"";width:4px;height:1em;background:var(--sun);border-radius:2px}
+.points{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px;counter-reset:pt}
+.points>li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;counter-increment:pt}
+.points>li::before{content:counter(pt);width:26px;height:26px;border-radius:50%;background:var(--leaf-soft);color:var(--leaf);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.points>li>div>b{display:block;font-size:16px}
+.points>li>div>span{color:var(--muted);font-size:15px}
+
+
+.hook{background:var(--leaf);color:var(--surface);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px}
+.hook .eyebrow{color:var(--surface);opacity:.85}
+.hook .q{font-family:var(--display);font-weight:900;font-size:clamp(18px,4.8vw,21px);line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{font:inherit;font-size:15px;text-align:left;background:var(--surface);color:var(--ink);border:2px solid transparent;border-radius:10px;padding:10px 14px;cursor:pointer;display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start}
+.opt i{font-style:normal;font-weight:700;color:var(--leaf)}
+.opt:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.opt[disabled]{cursor:default}
+.opt.right{border-color:var(--sun);background:var(--sun-soft)}
+.opt.right span::after{content:" ✓";color:var(--sun);font-weight:700}
+.opt.wrong{opacity:.6;text-decoration:line-through}
+.answer{background:var(--surface);color:var(--ink);border-radius:10px;padding:12px 14px;font-size:15px}
+.answer b{color:var(--sun)}
+.hook-hint{font-size:13px;opacity:.85}
+.pfigs{display:grid;gap:8px;margin-top:10px}
+.pfigs.n2{grid-template-columns:1fr 1fr} .pfigs.n3{grid-template-columns:1fr 1fr 1fr}
+.pfig{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.pfig button{padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;cursor:zoom-in;display:block;width:100%}
+.pfig img{display:block;width:100%;height:auto;max-width:100%}
+.fg{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.fg-grp{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.fg-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:8px 12px;color:#fff}
+.fg-h b{font-size:15px} .fg-h span{font-size:12px;opacity:.9;font-variant-numeric:tabular-nums}
+.fg-grp.hi .fg-h{background:var(--bad)} .fg-grp.mid .fg-h{background:var(--mid);color:#3a2a00} .fg-grp.lo .fg-h{background:var(--leaf);color:var(--surface)}
+.fg-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px 8px;padding:12px 10px}
+.fg-it{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;text-align:center}
+.fg-it img{width:100%;max-width:100%;height:auto;aspect-ratio:1;border-radius:10px;object-fit:cover;display:block}
+.fg-n{font-size:13px;line-height:1.3}
+.fg-v{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;padding:0 8px;border-radius:99px;color:#fff}
+.fg-grp.hi .fg-v{background:var(--bad)} .fg-grp.mid .fg-v{background:var(--mid);color:#3a2a00} .fg-grp.lo .fg-v{background:var(--leaf);color:var(--surface)}
+.points .fg-h span{color:inherit;font-size:12px}
+.points .fg-n{color:var(--ink);font-size:13px}
+.points .fg-v{color:#fff;font-size:12px}
+.points .fg-grp.mid .fg-v{color:#3a2a00}
+.points .fg-grp.lo .fg-v{color:var(--surface)}
+.pviz{margin-top:10px}
+.pviz .viz{background:var(--bg)}
+.kc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px}
+.kc-it{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;min-width:0}
+.kc-it img{width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block;max-width:100%}
+.points .kc-n{color:var(--ink);font-size:13px;line-height:1.35}
+.points .kc-v,.kc-v{background:var(--sun);color:#fff;font-weight:700;font-size:12px;border-radius:99px;padding:1px 8px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.points .kc-s{font-size:11px;color:var(--muted)}
+.portion{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.portion>div{background:var(--surface);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;border-top:5px solid var(--leaf);min-width:0}
+.portion>div.pro{border-top-color:var(--sun)}
+.portion h4{margin:0;font-size:16px}
+.points .portion .kcal{font-family:var(--display);font-weight:900;font-size:26px;color:var(--leaf);line-height:1;font-variant-numeric:tabular-nums}
+.points .portion .pro .kcal{color:var(--sun)}
+.points .portion .kcal small{font-size:13px;font-family:var(--body);font-weight:700;margin-left:2px}
+.points .portion .unit{font-size:12px;color:var(--muted)}
+.portion ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.portion li{display:flex;align-items:center;gap:8px;font-size:14px}
+.portion li img{width:40px;height:40px;border-radius:8px;object-fit:cover;flex:none}
+.portion li i{width:40px;height:40px;border-radius:8px;flex:none;background:var(--leaf-soft);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;color:var(--leaf)}
+.portion .pro li i{background:var(--sun-soft);color:var(--sun)}
+.points .portion li em{font-style:normal;font-size:11px;color:var(--bad);font-weight:700;display:block;line-height:1.3}
+.bodyw{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:center}
+.bodyw svg{width:110px;height:auto;max-width:100%}
+.bodyw ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.bodyw li{display:flex;justify-content:space-between;align-items:baseline;gap:8px;background:var(--surface);border-radius:10px;padding:8px 12px;font-size:14px}
+.points .bodyw li b{font-family:var(--display);font-size:22px;color:var(--water);font-variant-numeric:tabular-nums}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.duo figure{margin:0;background:var(--surface);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.duo svg{width:100%;height:auto;display:block}
+.duo figcaption{font-size:13px;text-align:center;font-weight:700}
+.duo .ok figcaption{color:var(--leaf)} .duo .no figcaption{color:var(--bad)}
+.points .duo p{font-size:12px;color:var(--muted);text-align:center;margin:0}
+.sug{background:var(--surface);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.sug svg{width:100%;height:auto;display:block}
+.points .sug .cap{font-size:13px;font-weight:700}
+.sug.no .cap{color:var(--bad)} .sug.ok .cap{color:var(--leaf)}
+.flow{display:flex;flex-direction:column;gap:6px}
+.flow-step{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 12px}
+.flow-step i{width:30px;height:30px;border-radius:50%;background:var(--leaf);color:var(--surface);font-style:normal;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.points .flow-step b{font-size:15px;display:block} .points .flow-step span{font-size:13px;color:var(--muted)}
+.flow-arrow{text-align:center;color:var(--leaf);font-size:16px;line-height:1}
+.flow-targets{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.points .flow-targets span{background:var(--leaf-soft);color:var(--leaf);font-weight:700;font-size:13px;border-radius:99px;padding:3px 12px}
+.swap{display:flex;flex-direction:column;gap:8px}
+.swap-row{display:grid;grid-template-columns:1fr 18px 1fr;align-items:center;gap:4px}
+.swap-c{display:flex;align-items:center;gap:6px;background:var(--surface);border-radius:10px;padding:6px;min-width:0;min-height:50px}
+.swap-c img{width:36px;height:36px;border-radius:8px;object-fit:cover;flex:none}
+.swap-c>div{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}
+.points .swap-c span{font-size:13px;color:var(--ink);line-height:1.3;white-space:nowrap}
+.swap-c>div{flex:1}
+.points .swap-c b{font-size:12px;color:#fff;border-radius:99px;padding:0 8px;font-variant-numeric:tabular-nums}
+.swap-c.hi b{background:var(--bad)} .swap-c.lo b{background:var(--leaf);color:var(--surface)} .swap-c.mid b{background:var(--mid);color:#3a2a00}
+.swap-ph{width:36px;height:36px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;background:var(--leaf-soft);color:var(--leaf)}
+.swap-row>.ar{color:var(--leaf);font-weight:900;text-align:center}
+.mwf{display:flex;flex-direction:column;gap:10px}
+.mwf-row{display:grid;grid-template-columns:68px 1fr;gap:10px;align-items:center}
+.points .mwf-row>span{font-weight:700;font-size:14px;color:var(--ink)}
+.mwf-blocks{display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap}
+.mwf-blocks div{border-radius:8px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;line-height:1.1}
+.mwf-blocks small{font-size:10px;font-weight:700}
+.mwf-blocks .m{background:var(--leaf)} .mwf-blocks .w{background:var(--water)} .mwf-blocks .f{background:var(--sun)}
+.points .mwf-row em{font-style:normal;font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;margin-left:4px}
+.mwf-row em.ok{background:var(--leaf-soft);color:var(--leaf)} .mwf-row em.no{background:var(--bad-soft);color:var(--bad)}
+.nl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;counter-reset:nl}
+.nl li{counter-increment:nl;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 12px;font-size:14px}
+.nl li::before{content:counter(nl);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;background:var(--leaf)}
+.nl li:nth-child(3n+2)::before{background:var(--sun)} .nl li:nth-child(3n)::before{background:var(--water)}
+.bal{display:flex;flex-direction:column;gap:8px}
+.bal-row{display:grid;grid-template-columns:1fr 30px 1fr 84px;gap:6px;align-items:center}
+.points .bal-row>span{font-size:13px;font-weight:700;text-align:center;border-radius:8px;padding:8px 4px;color:var(--ink)}
+.points .bal-row .in{background:var(--sun-soft)} .points .bal-row .out{background:var(--leaf-soft)}
+.points .bal-row .op{font-family:var(--display);font-size:22px;font-weight:900;color:var(--ink);background:none;padding:0}
+.points .bal-row .res{color:#fff}
+.bal-row .res.down{background:var(--leaf)} .bal-row .res.same{background:var(--water)} .bal-row .res.up{background:var(--bad)}
+.donut{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center}
+@media (max-width:420px){.donut{grid-template-columns:1fr;justify-items:center}}
+.donut svg{width:150px;height:150px}
+.donut ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;width:100%}
+.donut li{display:flex;align-items:center;gap:8px;font-size:14px}
+.donut li i{width:12px;height:12px;border-radius:3px;flex:none}
+.points .donut li b{margin-left:auto;font-variant-numeric:tabular-nums}
+.donut-extra{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.points .donut-extra span{font-size:12px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:2px 10px;color:var(--ink)}
+.bub{display:flex;flex-wrap:wrap;justify-content:center;padding:6px 0}
+.bub div{width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:15px;line-height:1.3;margin:0 -6px;mix-blend-mode:multiply;color:var(--ink)}
+:root[data-theme="dark"] .bub div{mix-blend-mode:normal}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .bub div{mix-blend-mode:normal}}
+.bub div:nth-child(6n+1){background:var(--water-soft)} .bub div:nth-child(6n+2){background:var(--leaf-soft)} .bub div:nth-child(6n+3){background:var(--sun-soft)}
+.bub div:nth-child(6n+4){background:var(--bad-soft)} .bub div:nth-child(6n+5){background:var(--leaf-soft)} .bub div:nth-child(6n){background:var(--water-soft)}
+.cloud{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.cloud span{border-radius:99px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;color:#fff;line-height:1.15;text-align:center}
+.cloud span small{font-size:10px;font-weight:500;opacity:.9}
+.cloud .v{background:var(--sun)} .cloud .m{background:var(--water)} .cloud .o{background:var(--leaf);color:var(--surface)}
+.cloud .s1{width:62px;height:62px;font-size:13px} .cloud .s2{width:74px;height:74px;font-size:14px} .cloud .s3{width:54px;height:54px;font-size:12px}
+.rb{display:flex;flex-direction:column;gap:10px}
+.rb-base{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:12px;padding:10px}
+.rb-base img{width:72px;height:72px;border-radius:10px;object-fit:cover}
+.points .rb-base b{display:block;font-size:16px;color:var(--ink)} .points .rb-base span{font-family:var(--display);font-weight:900;font-size:22px;color:var(--sun)}
+.rb-eq{text-align:center;font-weight:700;color:var(--muted);font-size:13px;letter-spacing:.1em}
+.rb-items{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rb-it{background:var(--surface);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;border-bottom:4px solid var(--sun);min-width:0}
+.rb-it img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;display:block;max-width:100%}
+.rb-tx{padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.tmpl{display:flex;flex-direction:column;gap:12px;background:var(--leaf-soft);border-radius:14px;padding:16px}
+.tmpl .eyebrow{color:var(--leaf)}
+.tmpl h3{font-size:18px}
+.tmpl button{padding:0;border:0;border-radius:12px;overflow:hidden;cursor:zoom-in;background:none;display:block;width:100%}
+.tmpl img{width:100%;height:auto;display:block;max-width:100%}
+.tmpl ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.tmpl p{font-size:13px;color:var(--muted)}
+.points .rb-it span{font-size:13px;color:var(--ink);line-height:1.4}
+.points .rb-it b{font-family:var(--display);font-size:20px;color:var(--sun);font-variant-numeric:tabular-nums;line-height:1.2}
+.rb-it b small{font-family:var(--body);font-size:11px;color:var(--muted)}
+
+/* ===== src/app/css/3-charts-a.css ===== */
+.ct{display:flex;flex-direction:column;gap:10px}
+.ct-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.ct-tab{font:inherit;font-size:13px;font-weight:700;white-space:nowrap;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:5px 12px;cursor:pointer}
+.ct-tab.on{background:var(--leaf);border-color:var(--leaf);color:var(--surface)}
+.ct-tab:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.ct-panel{display:flex;flex-direction:column;gap:6px;background:var(--surface);border-radius:12px;padding:10px 12px}
+.ct-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 40px;gap:10px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line)}
+.ct-row:last-of-type{border-bottom:0}
+.ct-name{display:flex;flex-direction:column;min-width:0}
+.ct-name span{font-size:14px;line-height:1.35} .ct-name small{font-size:11px;color:var(--muted)}
+.ct-bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.ct-bar i{display:block;height:100%;border-radius:4px}
+.ct-bar .lo,.ct-key .lo{background:var(--leaf)} .ct-bar .mid,.ct-key .mid{background:var(--mid)} .ct-bar .hi,.ct-key .hi{background:var(--bad)}
+.ct-k{text-align:right;font-variant-numeric:tabular-nums;font-size:15px}
+.ct-k.hi{color:var(--bad)} .ct-k.mid{color:var(--ink)} .ct-k.lo{color:var(--leaf)}
+.ct-note{font-size:12px;color:var(--muted);padding-top:4px}
+.ct-key{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.ct-key span{display:flex;align-items:center;gap:4px} .ct-key i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.hands{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hands figure{margin:0;background:var(--surface);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;border-top:5px solid var(--leaf);min-width:0}
+.hands figure.pro{border-top-color:var(--sun)}
+.hands img{width:100%;height:auto;display:block;max-width:100%}
+.hands figcaption{padding:8px 10px 10px;display:flex;flex-direction:column;gap:1px}
+.points .hands b{font-size:15px;color:var(--ink)}
+.points .hands .hk{font-family:var(--display);font-weight:900;font-size:20px;white-space:nowrap;color:var(--leaf);line-height:1.2}
+.points .hands .pro .hk{color:var(--sun)}
+.points .hands .hs{font-size:12px;color:var(--muted)}
+@media (max-width:560px){.hands{grid-template-columns:1fr}.hands figure{display:grid;grid-template-columns:1.25fr 1fr;align-items:center;border-top:0;border-left:5px solid var(--leaf)}.hands figure.pro{border-left-color:var(--sun)}.hands figcaption{padding:10px 12px}}
+.points ul.sub{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.points ul.sub>li{position:relative;padding-left:18px;font-size:15px;color:var(--ink);line-height:1.6}
+.points ul.sub>li::before{content:"";position:absolute;left:4px;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--sun)}
+.points .pt-after{margin-top:8px;font-weight:500;color:var(--ink)}
+.lead-hl{border-radius:14px;padding:16px 18px;background:var(--sun-soft);border-left:6px solid var(--sun);display:flex;flex-direction:column;gap:4px}
+.lead-hl span{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--sun)}
+.lead-hl p{font-family:var(--display);font-weight:900;font-size:clamp(19px,5.2vw,23px);line-height:1.5;color:var(--leaf);text-wrap:balance}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:440px){.vs{grid-template-columns:1fr}}
+.vs-col{border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.vs-col.good{background:var(--leaf-soft)} .vs-col.bad{background:var(--bad-soft)}
+.vs-col h4{margin:0;font-size:16px} .vs-col.good h4{color:var(--leaf)} .vs-col.bad h4{color:var(--bad)}
+.vs-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.vs-it{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;min-width:0}
+.vs-it img{width:100%;max-width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block}
+.points .vs-it span{font-size:12px;color:var(--ink);line-height:1.3}
+.vs-col ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.vs-col li{font-size:13px;color:var(--ink);padding-left:16px;position:relative;line-height:1.5}
+.vs-col.good li::before{content:"✓";position:absolute;left:0;color:var(--leaf);font-weight:700}
+.vs-col.bad li::before{content:"✗";position:absolute;left:0;color:var(--bad);font-weight:700}
+.v2{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative}
+.v2-w{grid-column:1/-1;text-align:center;font-family:var(--display);font-weight:900;font-size:18px;color:var(--ink)}
+.v2-col{border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
+.v2-col.good{background:var(--leaf-soft)} .v2-col.bad{background:var(--bad-soft)}
+.v2-col h4{margin:0;font-size:16px} .v2-col.good h4{color:var(--leaf)} .v2-col.bad h4{color:var(--bad)}
+.v2-body{display:flex;flex-direction:column;border-radius:40px 40px 14px 14px;overflow:hidden;background:var(--surface)}
+.v2-col.good .v2-body{width:64px;height:150px} .v2-col.bad .v2-body{width:96px;height:150px}
+.v2-body div{display:flex;align-items:center;justify-content:center}
+.points .v2-body span{font-size:11px;font-weight:700;color:#fff}
+.v2-col ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;align-self:stretch}
+.v2-col li{font-size:13px;color:var(--ink);text-align:center}
+.stk-key,.art-key{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.stk-key span,.art-key span{display:flex;align-items:center;gap:4px}
+.stk-key i,.art-key i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.stk{display:flex;flex-direction:column;gap:6px}
+.stk-row{display:grid;grid-template-columns:62px 1fr;gap:8px;align-items:center}
+.points .stk-row>span{font-size:13px;color:var(--ink)}
+.stk-bar{display:flex;height:20px;border-radius:5px;overflow:hidden}
+.stk-bar i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:700;color:#fff}
+.art{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.art figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.art svg{width:100%;max-width:90px;height:auto}
+.art figcaption{font-size:12px;text-align:center;color:var(--ink);line-height:1.3}
+.bf{display:flex;flex-direction:column;gap:14px}
+.bf-row{display:grid;grid-template-columns:40px 1fr;gap:8px;align-items:center}
+.points .bf-row>b{font-size:14px;color:var(--ink)}
+.bf-bar{position:relative;height:46px;background:var(--surface);border-radius:8px}
+.bf-seg{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:2px solid var(--surface);overflow:hidden}
+.points .bf-seg span{font-size:11px;font-weight:700;color:#fff;line-height:1.2}
+.points .bf-seg small{font-size:10px;color:#fff;opacity:.95}
+.bf-seg.lo{background:var(--water)} .bf-seg.lo2{background:var(--leaf)} .bf-seg.mid{background:var(--mid)} .bf-seg.hi{background:var(--bad)}
+.phs{display:flex;flex-direction:column;gap:12px}
+.phs figure{margin:0;display:flex;flex-direction:column;gap:4px}
+.phs button{padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;cursor:zoom-in;display:block;width:100%}
+.phs img{display:block;width:100%;height:auto;max-width:100%}
+.phs figcaption{font-size:13px;color:var(--ink)}
+.rt{display:flex;height:92px;border-radius:12px;overflow:hidden}
+.rt-p{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;min-width:0}
+.points .rt-p b{font-family:var(--display);font-size:26px;line-height:1;color:#fff}
+.rt-p:last-child{min-width:64px}
+.points .rt-p span{font-size:13px;font-weight:700;color:#fff}
+.rt-d{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--ink)}
+.rt-d i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.chips.two{grid-template-columns:1fr 1fr}
+.chips.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.chips.three div{padding:10px 6px;text-align:center}
+.chips.three b{font-family:var(--display);font-size:18px}
+.chips.three span{font-size:12px}
+.chips.two div{padding:8px 10px}
+.chips.two b{font-size:14px}
+.burn{display:flex;flex-direction:column;gap:8px}
+.burn-row{display:grid;grid-template-columns:minmax(0,0.9fr) 16px minmax(0,1.3fr);gap:6px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 10px}
+.burn-f{display:flex;flex-direction:column;min-width:0}
+.points .burn-f b{font-size:14px;color:var(--ink);line-height:1.3}
+.points .burn-f span{font-size:12px;color:var(--bad);font-weight:700}
+.burn-ar{color:var(--muted);font-weight:700;text-align:center}
+.burn-e{display:flex;flex-direction:column;gap:3px;min-width:0}
+.burn-top{display:flex;justify-content:space-between;gap:6px;font-size:13px}
+.points .burn-top span{color:var(--ink)}
+.points .burn-top b{color:var(--sun);white-space:nowrap;font-variant-numeric:tabular-nums}
+.burn-bar{height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+.burn-bar i{display:block;height:100%;background:var(--sun);border-radius:4px}
+.md{display:flex;flex-direction:column;gap:10px}
+.md-day{background:var(--surface);border-radius:12px;padding:10px;border-left:5px solid var(--leaf)}
+.md-day.hi{border-left-color:var(--bad)}
+.md-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.points .md-h b{font-size:15px;color:var(--ink)}
+.points .md-h span{font-family:var(--display);font-weight:900;font-size:18px;color:var(--leaf);white-space:nowrap}
+.points .md-day.hi .md-h span{color:var(--bad)}
+.md-meals{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.md-m{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;text-align:center}
+.md-m img{width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:6px;display:block;max-width:100%}
+.md-m i{width:100%;aspect-ratio:1;border-radius:6px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:10px;color:var(--muted)}
+.points .md-m small{font-size:9.5px;color:var(--muted);line-height:1.2}
+.points .md-m em{font-style:normal;font-size:10.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.2}
+.points .md-m em.hi{color:var(--bad)}
+.philo{background:var(--leaf-soft);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.philo .eyebrow{color:var(--leaf)}
+.philo p{font-size:14px;color:var(--ink)}
+.philo button{padding:0;border:0;border-radius:10px;overflow:hidden;background:#fff;cursor:zoom-in;display:block;width:100%}
+.philo img{display:block;width:100%;height:auto;max-width:100%}
+.c2{display:flex;flex-direction:column;gap:10px}
+.c2-row{background:var(--surface);border-radius:12px;padding:10px}
+.points .c2-h{font-family:var(--display);font-weight:900;font-size:16px;color:var(--ink);margin-bottom:6px}
+.c2-cols{display:grid;grid-template-columns:1.3fr 1fr;gap:8px}
+.c2-a,.c2-b{border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.c2-a{background:var(--bad-soft)} .c2-b{background:var(--leaf-soft)}
+.points .c2-a small,.points .c2-b small{font-size:11px;font-weight:700;color:var(--muted)}
+.c2-a div,.c2-b div{display:flex;flex-direction:column}
+.points .c2-a span,.points .c2-b span{font-size:13px;color:var(--ink);line-height:1.3}
+.points .c2-a b{font-size:15px;color:var(--bad)} .points .c2-b b{font-size:15px;color:var(--leaf)}
+
+/* ===== src/app/css/4-listen-language.css ===== */
+.tts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--leaf-soft);border-radius:12px;padding:8px 10px}
+.tts-btn{font:inherit;font-weight:700;font-size:15px;border:0;border-radius:99px;padding:8px 16px;background:var(--leaf);color:var(--surface);cursor:pointer}
+.tts-btn.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line)}
+.tts-btn:disabled{opacity:.5}
+.tts-btn:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.tts-rate{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted)}
+.tts-rate select{font:inherit;font-size:13px;padding:4px 6px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.tts-msg{font-size:12px;color:var(--muted)}
+.points>li.reading>div{background:var(--sun-soft);border-radius:10px;box-shadow:0 0 0 6px var(--sun-soft)}
+.points>li>div{min-width:0}
+html:not([lang=zh]) .points .swap-c span{white-space:normal}
+html:not([lang=zh]) .tbl th{white-space:normal}
+html:not([lang=zh]) .swap-row{grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr)}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:var(--surface);flex:none}
+.lang button{font:inherit;font-size:13px;font-weight:700;border:0;background:transparent;color:var(--muted);padding:5px 11px;cursor:pointer;min-height:30px}
+.lang button.on{background:var(--leaf);color:var(--surface)}
+
+/* ===== src/app/css/5-login-protection.css ===== */
+.wm{position:fixed;inset:0;z-index:40;pointer-events:none;background-repeat:repeat}
+.shield{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;align-items:center;justify-content:center;text-align:center;padding:16px}
+.shield div{display:flex;flex-direction:column;gap:6px} .shield b{font-size:18px} .shield span{color:var(--muted);font-size:14px}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input{-webkit-user-select:text;user-select:text}
+img{-webkit-user-drag:none}
+@media print{body{display:none!important}}
+.ubar{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.auth{max-width:420px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-top:6vh}
+.auth h1{font-size:clamp(28px,7vw,38px);font-weight:900}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.tabs button{font:inherit;font-weight:700;border:0;border-radius:9px;padding:10px;background:transparent;color:var(--muted);cursor:pointer}
+.tabs button.on{background:var(--leaf);color:var(--surface)}
+.form{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.form label{font-size:14px;font-weight:700;margin-top:6px}
+.form input{font:inherit;font-size:16px;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.form input:focus{outline:2px solid var(--leaf);outline-offset:1px}
+.form .btn{margin-top:10px}
+.btn:disabled{opacity:.6}
+.ferr{color:var(--bad);font-size:14px;min-height:1.2em;margin:4px 0 0}
+.stbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.stbox h2{font-size:22px} .stbox p{color:var(--muted)}
+.showpw{display:flex!important;align-items:center;gap:8px;font-weight:400!important;font-size:14px;color:var(--muted);margin-top:8px!important;cursor:pointer}
+.showpw input{width:18px;height:18px;margin:0}
+
+.pfig-hint{font-size:12px;color:var(--sun);margin-top:4px}
+.pfig figcaption{font-size:12px;color:var(--muted);line-height:1.5}
+.points span.pt{color:var(--muted);font-size:15px;display:block}
+.share{border:2px dashed var(--leaf);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.share .eyebrow{color:var(--leaf)}
+.share .sq{font-family:var(--display);font-weight:900;font-size:17px;line-height:1.55}
+.share p{font-size:14px;color:var(--muted)}
+.admin-entry{text-align:center;margin-top:4px}
+.admin-fab{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--surface);text-decoration:none;font-weight:700;font-size:14px;padding:10px 14px;border-radius:99px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.admin-fab b{background:var(--bad);color:#fff;border-radius:99px;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;padding:0 6px}
+
+/* ===== src/app/css/6-charts-b.css ===== */
+.tbl{overflow-x:auto}
+.tbl table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums;background:var(--surface);border-radius:10px;overflow:hidden}
+.tbl th,.tbl td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td.wrap,.tbl th.wrap{white-space:normal;text-align:left}
+.tbl td.wrap{white-space:pre-line}
+.tbl tr:has(td.wrap) td:first-child{font-weight:700;vertical-align:top}
+.tbl table:has(td.wrap){table-layout:auto}
+.tbl table:has(td.wrap) th{text-align:left}
+.tbl th:first-child,.tbl td:first-child{text-align:left;white-space:normal;min-width:4.6em}
+.tbl th,.tbl td{padding-left:8px;padding-right:8px}
+.tbl th{font-size:12px;color:var(--muted);font-weight:700}
+.tbl tr.best td{background:var(--leaf-soft);font-weight:700}
+.tbl tr.best td:first-child::after{content:" ✓";color:var(--leaf)}
+/* visuals */
+.viz{background:var(--bg);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.viz-title{font-weight:700;font-size:15px}
+.viz-note{font-size:12px;color:var(--muted);line-height:1.6}
+.hbars{display:flex;flex-direction:column;gap:10px}
+.hb{display:grid;grid-template-columns:1fr;gap:3px}
+.hb-top{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+.hb-top b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.hb-track{height:12px;background:var(--line);border-radius:6px;position:relative;overflow:visible}
+.hb-kc{font-style:normal;font-weight:500;color:var(--muted);margin-left:8px;font-size:12px}
+.hb-fill{height:100%;border-radius:6px;background:var(--leaf)}
+.hb-fill.hl{background:var(--bad)}
+.hb-target{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--sun)}
+.target-key{font-size:12px;color:var(--sun);font-weight:700}
+.gi{position:relative;padding-top:4px}
+.gi-band{display:flex;height:16px;border-radius:8px;overflow:hidden}
+.gi-band div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--surface)}
+.gi-band .lo{background:var(--leaf)} .gi-band .mid{background:var(--mid)} .gi-band .hi{background:var(--bad)}
+.gi-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:2px}
+.gi-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.gi-row{display:grid;grid-template-columns:72px 1fr 30px;gap:8px;align-items:center;font-size:13px}
+.gi-row .tr{height:6px;background:var(--line);border-radius:3px;position:relative}
+.gi-row .dot{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--surface)}
+.gi-row b{text-align:right;font-variant-numeric:tabular-nums}
+.cups{display:flex;flex-direction:column;gap:12px}
+.cup-row{display:flex;flex-direction:column;gap:6px}
+.cup-row .lab{display:flex;justify-content:space-between;font-size:13px}
+.cup-icons{display:flex;flex-wrap:wrap;gap:4px}
+.cup-icons svg{width:20px;height:26px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.chips div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.chips b{font-size:15px;color:var(--leaf)}
+.chips span{font-size:13px;color:var(--muted);line-height:1.5}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:440px){.split{grid-template-columns:1fr}}
+.split div{border-radius:10px;padding:12px 14px;min-width:0}
+.split .good{background:var(--leaf-soft)} .split .bad{background:var(--bad-soft)}
+.split h4{margin:0 0 6px;font-size:15px}
+.split .good h4{color:var(--leaf)} .split .bad h4{color:var(--bad)}
+.split ul{margin:0;padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:3px}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:20px 1fr;gap:12px;position:relative;padding-bottom:14px}
+.tl li:last-child{padding-bottom:0}
+.tl li::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--leaf);margin:7px 0 0 4px;position:relative;z-index:1}
+.tl li::after{content:"";position:absolute;left:9px;top:19px;bottom:0;width:2px;background:var(--line)}
+.tl li:last-child::after{display:none}
+.tl .h{font-weight:700;display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.tl .h em{font-style:normal;font-size:12px;color:var(--sun);font-weight:700;font-variant-numeric:tabular-nums}
+.tl .p{font-size:14px;color:var(--muted)}
+.check{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.check label{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.check input{margin-top:6px;accent-color:var(--leaf)}
+.swatch{display:flex;flex-direction:column;gap:6px}
+.sw{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;font-size:14px}
+.sw i{height:26px;border-radius:6px;border:1px solid var(--line)}
+.recap{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.recap div{font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;display:flex;gap:8px;min-width:0}
+.recap em{font-style:normal;color:var(--sun);font-weight:700;font-variant-numeric:tabular-nums;flex:none}
+
+.slides{display:flex;flex-direction:column;gap:14px}
+.slide{margin:0;display:flex;flex-direction:column;gap:6px}
+.slide button{padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;cursor:zoom-in;display:block;width:100%}
+.slide img{display:block;width:100%;height:auto;aspect-ratio:16/9;max-width:100%}
+.slide figcaption{font-size:13px;color:var(--muted)}
+
+.myth{display:grid;grid-template-columns:1fr;gap:0;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.myth div{padding:12px 16px;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.myth .m{background:var(--bad-soft)} .myth .f{background:var(--leaf-soft)}
+.myth .k{font-weight:700;font-size:13px;padding:1px 8px;border-radius:6px;color:var(--surface);white-space:nowrap;margin-top:3px}
+.myth .m .k{background:var(--bad)} .myth .f .k{background:var(--leaf)}
+.myth .m p{text-decoration:line-through;text-decoration-color:var(--bad);text-decoration-thickness:1.5px}
+.fact{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding-block:16px}
+.fact .num{font-family:var(--display);font-weight:900;font-size:clamp(30px,8vw,42px);color:var(--leaf);line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fact .num small{font-size:.42em;margin-left:2px}
+.fact p{font-size:14px;color:var(--muted)}
+.tips{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+.tips li{background:var(--leaf-soft);color:var(--ink);border-radius:99px;padding:5px 14px;font-size:14px}
+.task{background:var(--sun-soft);border-radius:12px;padding:16px 18px}
+.task .eyebrow{color:var(--sun)}
+.task p{margin-top:4px;white-space:pre-line}
+.calc{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:14px}
+.calc select{font:inherit;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.calc input{width:84px;font:inherit;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.calc output{font-weight:700;color:var(--leaf)}
+.actions{display:flex;flex-direction:column;gap:8px}
+.btn{font:inherit;font-weight:700;font-size:16px;border:0;border-radius:12px;padding:14px 18px;cursor:pointer;background:var(--leaf);color:var(--surface)}
+.btn:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.note{font-size:13px;color:var(--muted);text-align:center}
+.locked-card{text-align:center;align-items:center}
+.locked-card .clock{font-family:var(--display);font-size:clamp(34px,10vw,48px);font-weight:900;color:var(--sun);font-variant-numeric:tabular-nums;line-height:1.1}
+.peek{font-size:14px;color:var(--muted);background:var(--bg);border-radius:10px;padding:10px 14px}
+footer{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:16px}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--muted);text-decoration:underline;cursor:pointer}
+.confirm{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.owner{border:1.5px dashed var(--sun);border-radius:10px;padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.owner label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.lb{position:fixed;inset:0;z-index:50;background:rgba(10,20,17,.92);display:flex;align-items:safe center;justify-content:safe center;padding:max(56px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));overflow:auto}
+.lb img{display:block;margin:auto;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;background:#fff;border-radius:6px}
+@media (max-width:600px){.lb img{max-width:none;max-height:none;width:180vw}}
+.lb-close{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));background:#fff;color:#15302a;border:0;border-radius:99px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer;z-index:51}
+@media (prefers-reduced-motion:no-preference){.lesson{animation:rise .35s ease-out both}@keyframes rise{from{transform:translateY(6px)}to{transform:none}}}
+
+</style>
+</head><body>
+
+<div class="wm" id="wm" aria-hidden="true"></div>
+<div class="shield" id="shield" hidden><div><b data-t="内容已隐藏">内容已隐藏</b><span data-t="回到这个页面即可继续阅读">回到这个页面即可继续阅读</span></div></div>
+<div class="wrap" id="gate" hidden></div>
+<div class="wrap" id="app" hidden>
+  <div class="ubar" id="ubar"></div>
+  <header>
+    <div class="topline"><div class="eyebrow" data-t="21 DAYS · 每天一则健康资讯">21 DAYS · 每天一则健康资讯</div><span id="langTop"></span></div>
+    <h1 data-t="21天健康营养课">21天健康营养课</h1>
+    <p data-t="每天解锁一则。读完今天的内容，明天就能看下一则。">每天解锁一则。读完今天的内容，明天就能看下一则。</p>
+    <div class="prog">
+      <div class="prog-num" id="progNum">0<small> / 21 天</small></div>
+      <div class="bar" id="bar" aria-hidden="true"></div>
+    </div>
+    <div class="status" id="status"></div>
+  </header>
+
+
+  <section class="cal" id="cal" aria-label="21天课程表" data-t-aria="21天课程表"></section>
+
+  <article class="lesson" id="lesson" aria-live="polite"></article>
+
+  <footer>
+    <p data-t="本页内容为一般健康教育资讯，不能代替医生的诊断和治疗。如有慢性疾病、正在怀孕或服药，改变饮食前请先咨询医生。每个人的效果因人而异。">本页内容为一般健康教育资讯，不能代替医生的诊断和治疗。如有慢性疾病、正在怀孕或服药，改变饮食前请先咨询医生。每个人的效果因人而异。</p>
+    <p data-t="声明：本课程内容仅供内部训练使用，版权所有。未经许可，请勿截图、转发、复制或公开分享。">声明：本课程内容仅供内部训练使用，版权所有。未经许可，请勿截图、转发、复制或公开分享。</p>
+  </footer>
+</div>
+<div class="lb" id="lb" hidden><button class="lb-close" id="lbClose" type="button" data-t="关闭">关闭</button><img id="lbImg" alt=""></div>
+
+<script>
+var COURSE_DAYS = 21;
+/* ===== src/app/js-language/1-ui-text.js ===== */
+/* ---------- languages: 中文 / English / Bahasa Melayu ---------- */
+var LANG = (function(){ try{ var l = localStorage.getItem("h21_lang"); if(l==="zh"||l==="en"||l==="ms") return l; }catch(e){} return "zh"; })();
+var I18N = {
+"21 DAYS · 每天一则健康资讯":["21 DAYS · One health lesson a day","21 HARI · Satu info kesihatan sehari"],
+"21天健康营养课":["21-Day Health & Nutrition Course","Kursus Kesihatan & Nutrisi 21 Hari"],
+"每天解锁一则。读完今天的内容，明天就能看下一则。":["One lesson unlocks each day. Finish today's lesson and the next one opens tomorrow.","Satu pelajaran dibuka setiap hari. Habiskan pelajaran hari ini, esok pelajaran seterusnya dibuka."],
+" / 21 天":[" / 21 days"," / 21 hari"],
+"教练预览（只有你看得到）":["Coach preview (only you can see this)","Pratonton jurulatih (hanya anda boleh lihat)"],
+"显示全部 21 天内容":["Show all 21 days","Tunjukkan kesemua 21 hari"],
+"21天课程表":["21-day schedule","Jadual 21 hari"],
+"本页内容为一般健康教育资讯，不能代替医生的诊断和治疗。如有慢性疾病、正在怀孕或服药，改变饮食前请先咨询医生。每个人的效果因人而异。":["This page provides general health education and does not replace a doctor's diagnosis or treatment. If you have a chronic illness, are pregnant or take medication, consult your doctor before changing your diet. Results vary from person to person.","Kandungan halaman ini ialah maklumat pendidikan kesihatan umum dan tidak menggantikan diagnosis atau rawatan doktor. Jika anda mempunyai penyakit kronik, hamil atau sedang mengambil ubat, rujuk doktor sebelum mengubah pemakanan. Hasil berbeza mengikut individu."],
+"重新开始 21 天":["Restart the 21 days","Mula semula 21 hari"],
+"关闭":["Close","Tutup"],
+"先想一想":["Think first","Fikir dahulu"],
+"很好！":["Great! ","Bagus! "],
+"答对了！":["Correct! ","Betul! "],
+"正确答案是 {0}。":["The correct answer is {0}. ","Jawapan yang betul ialah {0}. "],
+" 往下看今天的详细内容。":[" Scroll down for today's details."," Baca butiran hari ini di bawah."],
+"选一个答案，看看你答对了没有":["Pick an answer and see if you're right","Pilih satu jawapan dan lihat sama ada anda betul"],
+"放大查看：":["Zoom in: ","Besarkan: "],
+"点图片可以放大查看":["Tap a picture to zoom in","Ketik gambar untuk besarkan"],
+" · {0} 杯":[" · {0} cups"," · {0} cawan"],
+"健康的小肠绒毛":["Healthy intestinal villi","Vilus usus yang sihat"],
+"又长又密，吸收面积大":["Long and dense, large absorption area","Panjang dan padat, luas penyerapan besar"],
+"受损的小肠绒毛":["Damaged intestinal villi","Vilus usus yang rosak"],
+"变短、稀疏，吸收变差":["Short and sparse, poorer absorption","Pendek dan jarang, penyerapan lemah"],
+"正常血糖范围":["Normal blood sugar range","Julat gula darah normal"],
+"早上":["Morning","Pagi"],
+"晚上":["Evening","Malam"],
+"血糖":["Blood sugar","Gula darah"],
+"饿 / 累":["Hungry/tired","Lapar/letih"],
+"血糖急升":["Sugar spike","Gula melonjak"],
+"肌肉":["Muscle","Otot"],
+"水":["Water","Air"],
+"脂肪":["Fat","Lemak"],
+"卡路里进":["Calories in","Kalori masuk"],
+"卡路里出":["Calories out","Kalori keluar"],
+"均衡":["Balanced","Nutrisi"],
+"营养":["nutrition","seimbang"],
+"血液流通的空间":["Space for blood flow","Ruang aliran darah"],
+"脂肪斑块":["Fatty plaque","Plak lemak"],
+" 分钟":[" min"," minit"],
+"不吃":["Skip","Tak makan"],
+"≈ 差不多等于 ≈":["≈ about the same as ≈","≈ lebih kurang sama dengan ≈"],
+"低于 200":["Under 200","Bawah 200"],
+"450 以上 kcal":["450+ kcal","450 ke atas kcal"],
+"预览":["Preview","Pratonton"],
+"▶ 听讲解":["▶ Listen","▶ Dengar"],
+"■ 停止":["■ Stop","■ Henti"],
+"语速":["Speed","Kelajuan"],
+"慢":["Slow","Perlahan"],
+"正常":["Normal","Biasa"],
+"快":["Fast","Laju"],
+"今日重点":["Today's key point","Fokus hari ini"],
+"今天要知道的 {0} 件事":["{0} things to know today","{0} perkara perlu tahu hari ini"],
+"图解":["Visual guide","Panduan visual"],
+"课堂讲义":["Class slides","Slaid kelas"],
+" · 点击放大":[" · tap to zoom"," · ketik untuk besarkan"],
+"康宝莱均衡营养":["Herbalife balanced nutrition","Nutrisi seimbang Herbalife"],
+"康宝莱均衡营养：30% 蛋白质、40% 醣类、30% 脂肪，加上纤维素、水分、睡眠和运动":["Herbalife balanced nutrition: 30% protein, 40% carbohydrates, 30% fat, plus fibre, water, sleep and exercise","Nutrisi seimbang Herbalife: 30% protein, 40% karbohidrat, 30% lemak, ditambah serat, air, tidur dan senaman"],
+"常见误区":["Common myth","Mitos biasa"],
+"误区":["Myth","Mitos"],
+"真相":["Fact","Fakta"],
+"实用小技巧":["Practical tips","Tip praktikal"],
+"想一想，分享出去":["Think and share","Fikir dan kongsi"],
+"把今天学到的内容分享给他，邀请他一起变健康。":["Share what you learned today and invite them to get healthy with you.","Kongsikan apa yang anda pelajari hari ini dan ajak mereka sihat bersama."],
+"今日小任务":["Today's task","Tugasan hari ini"],
+"我的目标":["My goal","Matlamat saya"],
+"减重":["Lose weight","Turun berat"],
+"增重":["Gain weight","Naik berat"],
+"维持体重":["Maintain weight","Kekalkan berat"],
+"体重":["Weight","Berat"],
+"我的体重":["My weight","Berat saya"],
+" 公斤 → 每天约 ":[" kg → about "," kg → kira-kira "],
+" 克蛋白质":[" g protein a day"," g protein sehari"],
+"{0}–{1} 公升（约 {2}–{3} 杯）":["{0}–{1} litres a day (about {2}–{3} cups)","{0}–{1} liter sehari (kira-kira {2}–{3} cawan)"],
+"拍照模板":["Photo template","Templat gambar"],
+"我已读完第 {0} 天":["I've finished Day {0}","Saya sudah habis Hari {0}"],
+"按下后，第 {0} 天会在明天凌晨 00:00 解锁。":["After you tap, Day {0} unlocks at 00:00 tomorrow.","Selepas ditekan, Hari {0} akan dibuka pada 00:00 esok."],
+"按下后就完成全部 21 天课程。":["Tap to complete the full 21-day course.","Tekan untuk menamatkan keseluruhan kursus 21 hari."],
+"你在 {0} 读完了这一天。":["You finished this day on {0}.","Anda menamatkan hari ini pada {0}."],
+"恭喜你完成全部 21 天课程！所有内容可以随时回看。":["Congratulations on completing all 21 days! You can review everything any time.","Tahniah kerana menamatkan kesemua 21 hari! Semua kandungan boleh diulang kaji bila-bila masa."],
+"今天可以阅读：":["Today you can read: ","Hari ini anda boleh baca: "],
+"今天的已经读完了。{0} 将在 {1} 后解锁":["Today's lesson is done. {0} unlocks in {1}","Pelajaran hari ini sudah selesai. {0} akan dibuka dalam {1}"],
+"第一周 · 营养基础":["Week 1 · Nutrition basics","Minggu 1 · Asas nutrisi"],
+"第二周 · 吃对与动起来":["Week 2 · Eat right & move","Minggu 2 · Makan betul & bergerak"],
+"第三周 · 持续与提升":["Week 3 · Keep going & level up","Minggu 3 · Teruskan & tingkatkan"],
+"Day":["Day","Hari"],
+"尚未开放":["Not open","Belum dibuka"],
+"你的课程开放到第 {0} 天。想继续看，请联系你的教练。":["Your course is open up to Day {0}. To continue, please contact your coach.","Kursus anda dibuka sehingga Hari {0}. Untuk teruskan, sila hubungi jurulatih anda."],
+"第一部分 · 营养基础":["Part 1 · Nutrition basics","Bahagian 1 · Asas nutrisi"],
+"第二部分 · 吃对与动起来":["Part 2 · Eat right & move","Bahagian 2 · Makan betul & bergerak"],
+"已读":["Done","Selesai"],
+"今天":["Today","Kini"],
+"已读完":["finished","selesai"],
+"今天可读":["available today","boleh dibaca hari ini"],
+"未解锁":["locked","berkunci"],
+"▶ 继续":["▶ Resume","▶ Sambung"],
+"❚❚ 暂停":["❚❚ Pause","❚❚ Jeda"],
+"没有声音？iPhone 请关掉静音模式（侧边静音键），或改用 Chrome 打开。":["No sound? On iPhone, turn off Silent mode (side switch), or open the link in Chrome.","Tiada bunyi? Di iPhone, matikan mod Senyap (suis tepi), atau buka pautan dengan Chrome."],
+"iPhone 用 Safari：请先关掉静音模式才有声音，或改用 Chrome 打开。":["iPhone + Safari: turn off Silent mode to hear the lesson, or open the link in Chrome.","iPhone + Safari: matikan mod Senyap untuk mendengar, atau buka pautan dengan Chrome."],
+"讲解完毕":["Finished","Selesai"],
+"这个浏览器不支持朗读":["This browser doesn't support read-aloud","Pelayar ini tidak menyokong bacaan suara"],
+"找不到中文语音，可能会用其他语言的声音朗读":["No English voice found on this device; another voice may be used","Suara Bahasa Melayu tidak ditemui pada peranti ini; suara bahasa lain mungkin digunakan"],
+"先想一想：":["Think first: ","Fikir dahulu: "],
+" 想好了，可以在页面上选出你的答案。":[" When you're ready, pick your answer on the page."," Apabila sudah bersedia, pilih jawapan anda di halaman."],
+"第{0}点，":["Point {0}. ","Perkara {0}. "],
+"关键数字：":["Key number: ","Angka utama: "],
+"常见误区：":["Common myth: ","Mitos biasa: "],
+" 真相是：":[" The fact: "," Faktanya: "],
+"实用小技巧：":["Practical tips: ","Tip praktikal: "],
+"想一想：":["Think about it: ","Fikirkan: "],
+"今日小任务：":["Today's task: ","Tugasan hari ini: "],
+"今天的讲解到这里，记得完成今日小任务。":["That's all for today. Remember to complete today's task.","Itu sahaja untuk hari ini. Jangan lupa siapkan tugasan hari ini."],
+"下一则资讯":["Next lesson","Pelajaran seterusnya"],
+"{0} · 明天见":["{0} · See you tomorrow","{0} · Jumpa esok"],
+"今天的内容已经读完了，给身体一点时间消化。":["You've finished today's lesson. Give your body time to take it in.","Anda sudah habis pelajaran hari ini. Beri badan masa untuk menyesuaikan diri."],
+"{0} 将在":["{0} unlocks in","{0} akan dibuka dalam"],
+"后解锁（明天 00:00）":["(at 00:00 tomorrow)","(pada 00:00 esok)"],
+"明天的主题：":["Tomorrow's topic: ","Topik esok: "],
+"完成的内容可以随时点上面的绿色格子回看。":["Tap the green squares above any time to review finished lessons.","Ketik petak hijau di atas bila-bila masa untuk ulang kaji pelajaran yang selesai."],
+"尚未解锁":["Not unlocked yet","Belum dibuka"],
+"请先读完前一天的内容。":["Please finish the previous day first.","Sila habiskan pelajaran hari sebelumnya dahulu."],
+"确定清除进度，从第 1 天重新开始？":["Clear your progress and start again from Day 1?","Padam kemajuan dan mula semula dari Hari 1?"],
+"确定清除":["Yes, clear","Ya, padam"],
+"取消":["Cancel","Batal"],
+"内容已隐藏":["Content hidden","Kandungan disembunyikan"],
+"回到这个页面即可继续阅读":["Return to this page to keep reading","Kembali ke halaman ini untuk terus membaca"],
+"声明：本课程内容仅供内部训练使用，版权所有。未经许可，请勿截图、转发、复制或公开分享。":["Notice: This course is for internal training use only. All rights reserved. Do not screenshot, forward, copy or share it publicly without permission.","Notis: Kandungan kursus ini untuk kegunaan latihan dalaman sahaja. Hak cipta terpelihara. Dilarang tangkap layar, majukan, salin atau kongsi secara terbuka tanpa kebenaran."],
+"管理员入口":["Admin login","Log masuk pentadbir"],
+"仅供内部训练使用":["For internal training only","Untuk latihan dalaman sahaja"],
+"正在载入 {0}…":["Loading {0}…","Memuatkan {0}…"],
+"正在记录…":["Saving…","Menyimpan…"],
+"管理员预览：21 天全部打开，进度不会被记录。":["Admin preview: all 21 days are open and progress isn't recorded.","Pratonton pentadbir: kesemua 21 hari dibuka dan kemajuan tidak direkodkan."],
+"恭喜你完成全部 21 天课程！":["Congratulations on completing all 21 days! ","Tahniah kerana menamatkan kesemua 21 hari! "],
+"你可以回看到 {0}，之后课程会关闭。":["You can review until {0}, after which the course closes.","Anda boleh ulang kaji sehingga {0}, selepas itu kursus akan ditutup."],
+"网络出错，请稍后再试":["Network error, please try again later","Ralat rangkaian, sila cuba lagi nanti"],
+"登录":["Log in","Log masuk"],
+"注册":["Register","Daftar"],
+"名字":["Name","Nama"],
+"电话号码":["Phone number","Nombor telefon"],
+"例如 0123456789":["e.g. 0123456789","cth. 0123456789"],
+"密码（至少 6 个字）":["Password (at least 6 characters)","Kata laluan (sekurang-kurangnya 6 aksara)"],
+"再输入一次密码":["Enter the password again","Masukkan kata laluan sekali lagi"],
+"提交注册":["Submit registration","Hantar pendaftaran"],
+"注册后需要教练审核，审核通过后就可以开始 21 天课程。":["After you register, your coach will review your account. Once approved, you can start the 21-day course.","Selepas mendaftar, jurulatih akan menyemak akaun anda. Setelah diluluskan, anda boleh memulakan kursus 21 hari."],
+"还没有账号？点上面的「注册」。忘记密码请联系你的教练。":["No account yet? Tap \"Register\" above. Forgot your password? Contact your coach.","Belum ada akaun? Ketik \"Daftar\" di atas. Lupa kata laluan? Hubungi jurulatih anda."],
+"两次输入的密码不一样":["The two passwords don't match","Kedua-dua kata laluan tidak sepadan"],
+"等待教练审核":["Waiting for coach approval","Menunggu kelulusan jurulatih"],
+"你的注册已经收到。教练审核通过后，你就可以开始 21 天课程。":["We've received your registration. Once your coach approves it, you can start the 21-day course.","Pendaftaran anda telah diterima. Setelah jurulatih meluluskannya, anda boleh memulakan kursus 21 hari."],
+"注册未通过":["Registration not approved","Pendaftaran tidak diluluskan"],
+"请联系你的教练了解详情。":["Please contact your coach for details.","Sila hubungi jurulatih anda untuk butiran."],
+"账号已停用":["Account disabled","Akaun dinyahaktifkan"],
+"请联系你的教练。":["Please contact your coach.","Sila hubungi jurulatih anda."],
+"已申请重新开通":["Re-access requested","Permohonan akses semula dihantar"],
+"教练批准后，你就可以再次阅读课程内容。":["Once your coach approves, you can read the course again.","Setelah jurulatih meluluskan, anda boleh membaca kursus semula."],
+"课程已结束":["Course ended","Kursus telah tamat"],
+"你已完成 21 天课程，回看期（完成后 7 天）已经结束。想再看一次，可以申请重新开通，教练批准后就能继续。":["You've completed the 21-day course and the review period (7 days after finishing) has ended. To read it again, request re-access; once your coach approves, you can continue.","Anda telah menamatkan kursus 21 hari dan tempoh ulang kaji (7 hari selepas tamat) sudah berakhir. Untuk membaca semula, mohon akses semula; setelah jurulatih meluluskan, anda boleh meneruskan."],
+"申请重新开通":["Request re-access","Mohon akses semula"],
+"无法使用":["Unavailable","Tidak boleh digunakan"],
+"重新检查":["Check again","Semak semula"],
+"登出（{0}）":["Log out ({0})","Log keluar ({0})"],
+"登出":["Log out","Log keluar"],
+"管理员预览":["Admin preview","Pratonton pentadbir"],
+"返回管理后台":["Back to admin","Kembali ke panel pentadbir"],
+" · 可回看到 {0}":[" · review until {0}"," · ulang kaji sehingga {0}"],
+"管理员登录已过期，请回到管理后台重新登录。":["Your admin login has expired. Please go back to the admin page and log in again.","Log masuk pentadbir telah tamat. Sila kembali ke panel pentadbir dan log masuk semula."],
+"登录已过期，或你的账号已在另一部设备登录。请重新登录。":["Your login has expired, or your account was logged in on another device. Please log in again.","Log masuk anda telah tamat, atau akaun anda telah log masuk pada peranti lain. Sila log masuk semula."],
+"重试":["Retry","Cuba lagi"],
+"教练权限：21 天全部开放，可以随时看任何一天。":["Coach access: all 21 days are open; view any day any time.","Akses jurulatih: kesemua 21 hari dibuka; lihat mana-mana hari bila-bila masa."],
+"显示密码":["Show password","Tunjuk kata laluan"],
+"服务器未连接资料库（请在 Cloudflare 设置 D1 绑定，名称为 DB）":["The server isn't connected to the database (set a D1 binding named DB in Cloudflare)","Pelayan tidak disambungkan ke pangkalan data (tetapkan pengikatan D1 bernama DB dalam Cloudflare)"],
+"请填写名字":["Please enter your name","Sila masukkan nama anda"],
+"请填写正确的电话号码":["Please enter a valid phone number","Sila masukkan nombor telefon yang betul"],
+"密码至少 6 个字":["Password must be at least 6 characters","Kata laluan mestilah sekurang-kurangnya 6 aksara"],
+"这个电话号码已经注册过了，请直接登录":["This phone number is already registered. Please log in.","Nombor telefon ini sudah didaftarkan. Sila log masuk."],
+"电话号码或密码不正确":["Incorrect phone number or password","Nombor telefon atau kata laluan tidak betul"],
+"请先登录":["Please log in first","Sila log masuk dahulu"],
+"没有这一天":["That day doesn't exist","Hari itu tidak wujud"],
+"账号尚未开通":["Account not activated yet","Akaun belum diaktifkan"],
+"课程已到期":["The course has expired","Kursus telah tamat tempoh"],
+"这一天还没解锁":["This day isn't unlocked yet","Hari ini belum dibuka"],
+"管理员预览不记录进度":["Admin preview doesn't record progress","Pratonton pentadbir tidak merekod kemajuan"],
+"账号无法使用":["Account unavailable","Akaun tidak boleh digunakan"],
+"无效操作":["Invalid action","Tindakan tidak sah"],
+"课程还没到期":["The course hasn't expired yet","Kursus belum tamat tempoh"],
+"找不到":["Not found","Tidak ditemui"]
+};
+var MONTHS = {en:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], ms:["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogo","Sep","Okt","Nov","Dis"]};
+
+/* ===== src/app/js-language/2-language-tools.js ===== */
+function T(s){ var r = s; if(LANG!=="zh"){ var e = I18N[s]; if(e){ r = e[LANG==="en"?0:1]; } } if(typeof COURSE_DAYS!=="undefined" && COURSE_DAYS!==21) r = r.replace(/\b21\b/g, String(COURSE_DAYS)); var a = arguments; return a.length>1 ? r.replace(/\{(\d)\}/g, function(m,i){ return a[+i+1]; }) : r; }
+function DN(n){ return LANG==="zh" ? "第 "+n+" 天" : (LANG==="en" ? "Day " : "Hari ")+n; }
+function langDate(y,m,d){ return LANG==="zh" ? y+"年"+m+"月"+d+"日" : d+" "+MONTHS[LANG][m-1]+" "+y; }
+function langSwitchHTML(){ return '<div class="lang" role="group" aria-label="Language / 语言 / Bahasa">'+[["zh","中文"],["en","EN"],["ms","BM"]].map(function(x){ return '<button type="button" data-lang="'+x[0]+'" class="'+(LANG===x[0]?'on':'')+'" aria-pressed="'+(LANG===x[0])+'">'+x[1]+'</button>'; }).join("")+'</div>'; }
+function applyStatic(){
+  document.documentElement.lang = LANG==="zh" ? "zh" : LANG;
+  document.querySelectorAll("[data-t]").forEach(function(el){ el.textContent = T(el.getAttribute("data-t")); });
+  document.querySelectorAll("[data-t-aria]").forEach(function(el){ el.setAttribute("aria-label", T(el.getAttribute("data-t-aria"))); });
+  document.querySelectorAll("[data-lang]").forEach(function(b){ var on = b.getAttribute("data-lang")===LANG; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+  document.title = T("21天健康营养课");
+}
+function setLang(l){
+  if(l===LANG) return; LANG = l; try{ localStorage.setItem("h21_lang", l); }catch(e){}
+  applyStatic(); if(typeof window.onLangChange==="function") window.onLangChange();
+}
+document.addEventListener("click", function(e){ var b = e.target.closest && e.target.closest("[data-lang]"); if(b){ setLang(b.getAttribute("data-lang")); } });
+
+
+</script>
+<script>
+/* ===== src/app/js-app/01-state-and-api.js ===== */
+const API = "/api";
+let TOKEN = null; try{ TOKEN = localStorage.getItem("h21_token"); }catch(e){}
+let ADMIN = null; try{ ADMIN = localStorage.getItem("h21_admin"); }catch(e){}
+const isPreview = new URLSearchParams(location.search).has("preview") && !!ADMIN;
+const DAYS = Array.from({length:COURSE_DAYS},()=>({t:"",_full:false}));
+let LIMIT = COURSE_DAYS; // last day this customer may read (set by the coach); never above this page's days
+let done = {}, selected = null, preview = false, ME = null, SERVER_TODAY = null;
+const pad = n => String(n).padStart(2,"0");
+const today = () => SERVER_TODAY || new Date(Date.now()+8*3600e3).toISOString().slice(0,10);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const LOCK = '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="5.5" width="8" height="5.5" rx="1.2" fill="currentColor"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
+async function api(path, opts={}){
+  const tok = isPreview ? ADMIN : TOKEN;
+  const r = await fetch(API+path, {method: opts.method||"GET", headers: Object.assign({"content-type":"application/json"}, tok?{authorization:"Bearer "+tok}:{}), body: opts.body?JSON.stringify(opts.body):undefined});
+  let d = {}; try{ d = await r.json(); }catch(e){}
+  if(!r.ok){ const e = new Error(T(d.error||"网络出错，请稍后再试")); e.status = r.status; e.code = d.code; throw e; }
+  return d;
+}
+function isUnlocked(n){ if(n===1) return true; const prev = done[n-1]; return !!prev && today() > prev; }
+function state(n){ if(n > LIMIT) return "locked"; if(done[n]) return "done"; if(isUnlocked(n)) return "today"; return "locked"; }
+function nextDay(){ for(let n=1;n<=LIMIT;n++) if(!done[n]) return n; return null; }
+function msToMidnight(){ const now = Date.now()+8*3600e3; const d = new Date(now); const m = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()+1); return m - now; }
+function fmt(ms){ const s = Math.max(0,Math.floor(ms/1000)); return pad(Math.floor(s/3600))+":"+pad(Math.floor(s%3600/60))+":"+pad(s%60); }
+
+/* ===== src/app/js-app/02-lesson-pieces.js ===== */
+
+
+function foodsHTML(groups){
+  if(!groups) return "";
+  return '<div class="fg">'+groups.map(g=>'<div class="fg-grp '+g.cls+'"><div class="fg-h"><b>'+esc(g.h)+'</b><span>'+esc(g.sub)+'</span></div><div class="fg-items">'+
+    g.items.map(([k,n,v])=>'<div class="fg-it"><img loading="lazy" src="fig/food_'+k+'.jpg" alt="'+esc(n)+'" width="240" height="240"><span class="fg-n">'+esc(n)+'</span><span class="fg-v">'+v+'</span></div>').join("")+'</div></div>').join("")+'</div>';
+}
+const QS = [];
+const answered = {};
+function hookHTML(n){
+  const q = QS[n-1]; if(!q) return "";
+  const pick = answered[n];
+  const L = "ABCD";
+  let h = '<div class="hook"><div class="eyebrow">'+T("先想一想")+'</div><div class="q">'+esc(q.q)+'</div><div class="opts">'+
+    q.opts.map((o,i)=>{ let c = "opt"; if(pick!==undefined){ if(q.a===-1 ? i===pick : i===q.a) c+=" right"; else if(i===pick) c+=" wrong"; }
+      return '<button type="button" class="'+c+'" data-opt="'+i+'"'+(pick!==undefined?' disabled':'')+'><i>'+L[i]+'</i><span>'+esc(o)+'</span></button>'; }).join("")+'</div>';
+  if(pick!==undefined){
+    const verdict = q.a===-1 ? T("很好！") : (pick===q.a ? T("答对了！") : T("正确答案是 {0}。", L[q.a]));
+    h += '<div class="answer"><b>'+verdict+'</b>'+esc(q.why)+T(' 往下看今天的详细内容。')+'</div>';
+  } else h += '<div class="hook-hint">'+T("选一个答案，看看你答对了没有")+'</div>';
+  return h+'</div>';
+}
+
+/* ===== src/app/js-app/03-image-figures.js ===== */
+const FIGSZ = {"d1_food":[1100,1122],"d1_drink":[720,574],"d1_carbpro":[940,442],"d2_body":[384,623],"d3_wall":[904,698],"d3_amino":[1100,512],"d5_swap":[1100,576],"d5_comp":[1100,755],"d6_mwf":[1100,661],"d6_roles":[1100,745],"d6_plant":[1100,1111],"d6_animal":[1100,805],"d7_photo":[1100,1228],"d7_good":[1013,1087],"d7_bad":[1023,1166],"d8_list":[657,753],"d9_tips":[675,1144],"d10_bf":[1100,955],"d10_2000":[1002,1192],"d10_eq":[923,585],"d11_phil":[1100,778],"d13_seed":[1100,568],"d14_body":[1100,813],"d16_dehyd":[1100,539],"d17_veg":[997,666],"d1_snack":[668,557],"d4_bad":[1100,265],"d4_good":[1100,286],"fishoil_report":[976,640],"artery_real":[708,394],"liver_real":[544,330],"heart_attack":[720,410],"tuna_a":[1092,172],"tuna_b":[1090,198],"tuna_c":[1082,173],"philosophy":[867,598],"sci_team":[1200,675],"sci_quality":[1200,580],"sci_cert":[586,586],"sci_award1":[1200,675],"sci_award2":[1200,675],"sci_187":[1200,675],"nut_study":[635,495],"no1_world":[475,660],"nut_decline":[965,672],"skin_products":[500,319],"skin_products2":[1200,446],"fib_benefit":[1200,675],"fib_5g":[1200,636],"fib_study":[1200,675],"fib_25g":[1200,636],"fib_product":[1200,627],"no1_three":[1200,675]};
+function figsHTML(list,full){
+  if(!list || !list.length) return "";
+  return '<div class="pfigs n'+(full?1:Math.min(list.length,3))+'">'+list.map(x=>{ const s = FIGSZ[x.f]||[1000,700];
+    return '<figure class="pfig"><button type="button" data-zoom="fig/'+x.f+'.jpg" aria-label="'+T("放大查看：")+esc(x.cap)+'"><img loading="lazy" src="fig/'+x.f+'.jpg" alt="'+esc(x.cap)+'" width="'+s[0]+'" height="'+s[1]+'"></button><figcaption>'+esc(x.cap)+'</figcaption></figure>'; }).join("")+'</div>'+(list.length>1?'<div class="pfig-hint">'+T("点图片可以放大查看")+'</div>':'');
+}
+
+/* ===== src/app/js-app/04-charts.js ===== */
+/* ---------- visuals ---------- */
+function vizHTML(v){
+  let body = "";
+  if(v.type==="bars"){
+    const max = Math.max(...v.items.map(i=>i[1]), v.target?v.target[0]:0) * 1.08;
+    body = '<div class="hbars">'+v.items.map(([l,val,hl,kc])=>
+      '<div class="hb"><div class="hb-top"><span>'+esc(l)+'</span><b>'+(v.unit===''?val.toFixed(2):val+' '+esc(v.unit))+(kc!==undefined?'<em class="hb-kc">'+kc+' kcal</em>':'')+'</b></div><div class="hb-track"><div class="hb-fill'+(hl?' hl':'')+'" style="width:'+(val/max*100).toFixed(1)+'%"></div>'+
+      (v.target?'<div class="hb-target" style="left:'+(v.target[0]/max*100).toFixed(1)+'%"></div>':'')+'</div></div>').join("")+'</div>'+
+      (v.target?'<div class="target-key">┃ '+esc(v.target[1])+'</div>':'');
+  } else if(v.type==="scale"){
+    const span = v.max - v.min, col = x => x<55?"var(--leaf)":x<70?"var(--mid)":"var(--bad)";
+    body = '<div class="gi"><div class="gi-band">'+v.zones.map(([a,b,l,c])=>'<div class="'+c+'" style="width:'+((b-a)/span*100)+'%">'+esc(l)+'</div>').join("")+'</div>'+
+      '<div class="gi-axis"><span>0</span><span style="margin-left:'+(55/span*100-6)+'%">55</span><span>70</span><span>100</span></div></div>'+
+      '<div class="gi-list">'+v.marks.map(([l,x])=>'<div class="gi-row"><span>'+esc(l)+'</span><div class="tr"><i class="dot" style="left:'+(x/span*100)+'%;background:'+col(x)+'"></i></div><b>'+x+'</b></div>').join("")+'</div>';
+  } else if(v.type==="cups"){
+    let cid = 0;
+    const cup = (fill)=>{ const id = "cup"+(cid++); return '<svg viewBox="0 0 20 26" aria-hidden="true"><defs><clipPath id="'+id+'"><path d="M2 2h16l-2 22H4z"/></clipPath></defs>'+
+      '<rect x="0" y="'+(24-22*fill).toFixed(1)+'" width="20" height="'+(22*fill).toFixed(1)+'" fill="var(--leaf)" opacity=".7" clip-path="url(#'+id+')"/>'+
+      '<path d="M2 2h16l-2 22H4z" fill="none" stroke="var(--leaf)" stroke-width="1.6" stroke-linejoin="round"/></svg>'; };
+    body = '<div class="cups">'+v.rows.map(([l,n,s])=>{ let ic=""; for(let i=0;i<Math.ceil(n);i++){ ic += cup(Math.min(1,n-i)); }
+      return '<div class="cup-row"><div class="lab"><b>'+esc(l)+(String(s).indexOf("8–10")>=0?'':T(' · {0} 杯', n))+'</b><span>'+esc(s)+'</span></div><div class="cup-icons">'+ic+'</div></div>'; }).join("")+'</div>';
+  } else if(v.type==="chips"){
+    body = '<div class="chips'+(v.cols===2?' two':v.cols===3?' three':'')+'">'+v.items.map(([a,b])=>'<div><b>'+esc(a)+'</b><span>'+esc(b)+'</span></div>').join("")+'</div>';
+  } else if(v.type==="split"){
+    const side = s=>'<div class="'+s.cls+'"><h4>'+esc(s.h)+'</h4><ul>'+s.items.map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul></div>';
+    body = '<div class="split">'+side(v.left)+side(v.right)+'</div>';
+  } else if(v.type==="timeline"){
+    body = '<ol class="tl">'+v.items.map(it=>'<li><div><div class="h">'+esc(it[0])+(it.length>2?'<em>'+esc(it[1])+'</em>':'')+'</div><div class="p">'+esc(it.length>2?it[2]:it[1])+'</div></div></li>').join("")+'</ol>';
+  } else if(v.type==="check"){
+    body = '<ul class="check">'+v.items.map((it,i)=>'<li><label><input type="checkbox" id="chk'+i+'"> <span>'+esc(it)+'</span></label></li>').join("")+'</ul>';
+  } else if(v.type==="swatch"){
+    body = '<div class="swatch">'+v.items.map(([c,l])=>'<div class="sw"><i style="background:'+c+'"></i><span>'+esc(l)+'</span></div>').join("")+'</div>';
+  } else if(v.type==="table"){
+    body = '<div class="tbl"><table><thead><tr>'+v.head.map(h=>'<th>'+esc(h)+'</th>').join("")+'</tr></thead><tbody>'+
+      v.rows.map((r,i)=>'<tr'+(i===v.best?' class="best"':'')+'>'+r.map((c,ci)=>'<td'+(String(c).length>14||(v.wrap||[]).includes(ci)?' class="wrap"':'')+'>'+esc(c)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';
+  } else if(v.type==="kcal"){
+    body = '<div class="kc" style="grid-template-columns:repeat('+Math.min(v.items.length,3)+',minmax(0,1fr))">'+v.items.map(([k,n,c,s])=>'<div class="kc-it"><img loading="lazy" src="fig/k_'+k+'.jpg" alt="'+esc(n)+'" width="260" height="260"><span class="kc-n">'+esc(n)+'</span><span class="kc-v">'+esc(c)+'</span>'+(s?'<span class="kc-s">'+esc(s)+'</span>':'')+'</div>').join("")+'</div>';
+  } else if(v.type==="portion"){
+    const col = (c,cls)=>'<div class="'+cls+'"><h4>'+esc(c.h)+'</h4>'+(c.kcal?'<div><span class="kcal">'+esc(c.kcal)+'<small>kcal</small></span></div>':'')+(c.unit?'<div class="unit">'+esc(c.unit)+'</div>':'')+'<ul>'+
+      c.items.map(([n,img,warn])=>'<li>'+(img?'<img loading="lazy" src="fig/k_'+img+'.jpg" alt="">':'<i>'+esc(n.slice(0,1))+'</i>')+'<span>'+esc(n)+(warn?'<em>'+esc(warn)+'</em>':'')+'</span></li>').join("")+'</ul></div>';
+    body = '<div class="portion">'+col(v.carb,"carb")+col(v.pro,"pro")+'</div>';
+  } else if(v.type==="body"){
+    const lvl = 214 - 206*v.level;
+    body = '<div class="bodyw"><svg viewBox="0 0 120 220" aria-hidden="true"><defs><clipPath id="bw"><circle cx="60" cy="24" r="17"/><rect x="36" y="44" width="48" height="84" rx="16"/><rect x="18" y="48" width="14" height="74" rx="7"/><rect x="88" y="48" width="14" height="74" rx="7"/><rect x="39" y="118" width="18" height="96" rx="9"/><rect x="63" y="118" width="18" height="96" rx="9"/></clipPath></defs>'+
+      '<g clip-path="url(#bw)"><rect width="120" height="220" fill="var(--line)"/><rect y="'+lvl+'" width="120" height="'+(220-lvl)+'" fill="var(--water)"/><path d="M0 '+lvl+' q15 -5 30 0 t30 0 t30 0 t30 0" fill="none" stroke="var(--water-soft)" stroke-width="2"/></g>'+
+      '<text x="60" y="'+Math.min(lvl+20,122)+'" text-anchor="middle" font-size="18" font-weight="900" fill="#fff">'+Math.round(v.level*100)+'%</text></svg><ul>'+
+      v.items.map(([n,val])=>'<li><span>'+esc(n)+'</span><b>'+esc(val)+'</b></li>').join("")+'</ul></div>';
+  } else if(v.type==="villi"){
+    let ok="", no="";
+    for(let i=0;i<7;i++){ const x=8+i*26; ok += '<rect x="'+x+'" y="'+(18+(i%2)*6)+'" width="16" height="'+(64-(i%2)*6)+'" rx="8" fill="var(--tissue)"/><circle cx="'+(x+8)+'" cy="'+(30+(i%3)*12)+'" r="2" fill="#fff" opacity=".7"/>'; }
+    const hs=[16,8,22,0,12,6,18];
+    for(let i=0;i<7;i++){ const x=8+i*26, h=hs[i]; if(h) no += '<rect x="'+x+'" y="'+(82-h)+'" width="16" height="'+(h+4)+'" rx="7" fill="var(--tissue)" opacity=".75"/>'; }
+    no += '<circle cx="90" cy="76" r="3" fill="var(--bad)"/><circle cx="140" cy="78" r="2.5" fill="var(--bad)"/><circle cx="40" cy="79" r="2" fill="var(--bad)"/>';
+    const wall = '<rect x="0" y="80" width="190" height="20" rx="4" fill="var(--sun-soft)"/>';
+    body = '<div class="duo"><figure class="ok"><svg viewBox="0 0 190 100" aria-hidden="true">'+wall+ok+'</svg><figcaption>'+T('健康的小肠绒毛')+'</figcaption><p>'+T('又长又密，吸收面积大')+'</p></figure>'+
+      '<figure class="no"><svg viewBox="0 0 190 100" aria-hidden="true">'+wall+no+'</svg><figcaption>'+T('受损的小肠绒毛')+'</figcaption><p>'+T('变短、稀疏，吸收变差')+'</p></figure></div>';
+  } else if(v.type==="sugar"){
+    const band = '<rect x="30" y="58" width="282" height="26" fill="var(--leaf-soft)"/><text x="306" y="75" text-anchor="end" font-size="9" fill="var(--leaf)">'+T("正常血糖范围")+'</text>';
+    const axis = '<line x1="30" y1="122" x2="312" y2="122" stroke="var(--muted)" stroke-width="1"/><line x1="30" y1="10" x2="30" y2="122" stroke="var(--muted)" stroke-width="1"/><text x="32" y="135" font-size="10" fill="var(--muted)">'+T("早上")+'</text><text x="312" y="135" text-anchor="end" font-size="10" fill="var(--muted)">'+T("晚上")+'</text><text x="14" y="66" font-size="10" fill="var(--muted)" transform="rotate(-90 14 66)" text-anchor="middle">'+T("血糖")+'</text>';
+    let path, extra="";
+    if(v.mode==="spike"){
+      path = "M30 71 C50 71 55 14 78 14 C100 14 102 112 124 112 C146 112 150 14 172 14 C194 14 196 112 218 112 C240 112 244 14 266 14 C288 14 292 100 312 100";
+      [124,218].forEach(x=>{ const hw = LANG==="zh"?38:62; extra += '<rect x="'+(x-hw/2)+'" y="103" width="'+hw+'" height="17" rx="8.5" fill="var(--bad)"/><text x="'+x+'" y="115" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fff">'+T("饿 / 累")+'</text>'; });
+      extra += '<text x="78" y="10" text-anchor="middle" font-size="9" fill="var(--bad)">'+T("血糖急升")+'</text>';
+    } else {
+      path = "M30 71 C60 63 80 79 110 71 C140 63 160 79 190 71 C220 63 240 79 270 71 C290 66 300 71 312 71";
+    }
+    body = '<div class="sug '+(v.mode==="spike"?"no":"ok")+'"><span class="cap">'+esc(v.cap)+'</span><svg viewBox="0 0 320 140" aria-hidden="true">'+band+axis+'<path d="'+path+'" fill="none" stroke="'+(v.mode==="spike"?"var(--bad)":"var(--leaf)")+'" stroke-width="3" stroke-linecap="round"/>'+extra+'</svg></div>';
+  } else if(v.type==="flow"){
+    body = '<div class="flow">'+v.steps.map(([a,b],i)=>(i?'<div class="flow-arrow">▼</div>':'')+'<div class="flow-step"><i>'+(i+1)+'</i><div><b>'+esc(a)+'</b><span>'+esc(b)+'</span></div></div>').join("")+
+      (v.targets?'<div class="flow-arrow">▼</div><div class="flow-targets">'+v.targets.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>':'')+'</div>';
+  } else if(v.type==="swap"){
+    const cell=(c)=>'<div class="swap-c '+c[2]+'">'+(c[3]?'<img loading="lazy" src="fig/'+c[3]+'.jpg" alt="">':'<i class="swap-ph">'+esc(c[0].slice(0,1))+'</i>')+'<div><span>'+esc(c[0])+'</span>'+(c[1]!==""?'<b>'+esc(c[1])+'</b>':'')+'</div></div>';
+    body = '<div class="swap">'+v.rows.map(([a,b])=>'<div class="swap-row">'+cell(a)+'<span class="ar">→</span>'+cell(b)+'</div>').join("")+'</div>';
+  } else if(v.type==="mwf"){
+    const blk=(cls,l,n,s)=>'<div class="'+cls+'" style="width:'+s+'px;height:'+s+'px;font-size:'+Math.round(s*0.42)+'px">'+l+'<small>'+n+'</small></div>';
+    body = '<div class="mwf">'+v.rows.map(r=>'<div class="mwf-row"><span>'+esc(r[0])+'</span><div class="mwf-blocks">'+blk("m","M",T("肌肉"),r[1])+blk("w","W",T("水"),r[2])+blk("f","F",T("脂肪"),r[3])+(r[4]?'<em class="'+r[5]+'">'+esc(r[4])+'</em>':'')+'</div></div>').join("")+'</div>';
+  } else if(v.type==="numlist"){
+    body = '<ol class="nl">'+v.items.map(x=>'<li><span>'+esc(x)+'</span></li>').join("")+'</ol>';
+  } else if(v.type==="balance"){
+    body = '<div class="bal">'+v.rows.map(([op,res,cls])=>'<div class="bal-row"><span class="in">'+T("卡路里进")+'</span><span class="op">'+op+'</span><span class="out">'+T("卡路里出")+'</span><span class="res '+cls+'">'+esc(res)+'</span></div>').join("")+'</div>';
+  } else if(v.type==="donut"){
+    const C=2*Math.PI*40; let off=0, arcs="";
+    v.segs.forEach(([l,pc,col])=>{ const len=C*pc/100; arcs += '<circle cx="60" cy="60" r="40" fill="none" stroke="'+col+'" stroke-width="18" stroke-dasharray="'+(len-2)+' '+(C-len+2)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 60 60)"/>'; off+=len; });
+    body = '<div class="donut"><svg viewBox="0 0 120 120" aria-hidden="true">'+arcs+'<text x="60" y="57" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">'+T("均衡")+'</text><text x="60" y="71" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">'+T("营养")+'</text></svg><div><ul>'+
+      v.segs.map(([l,pc,col])=>'<li><i style="background:'+col+'"></i><span>'+esc(l)+'</span><b>'+pc+'%</b></li>').join("")+'</ul><div class="donut-extra">'+v.extra.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div></div></div>';
+  } else if(v.type==="bubbles"){
+    body = '<div class="bub">'+v.items.map(x=>'<div>'+esc(x)+'</div>').join("")+'</div>';
+  } else if(v.type==="cloud"){
+    body = '<div class="cloud">'+v.items.map(([a,b,k,s])=>'<span class="'+k+' s'+s+'">'+esc(a)+(b?'<small>'+esc(b)+'</small>':'')+'</span>').join("")+'</div>';
+  } else if(v.type==="hands"){
+    body = '<div class="hands">'+v.items.map(([img,h,k,s,cls])=>'<figure class="'+cls+'"><img loading="lazy" src="fig/'+img+'.jpg" alt="'+esc(h)+'" width="600" height="440"><figcaption><b>'+esc(h)+'</b><span class="hk">'+esc(k)+'</span><span class="hs">'+esc(s)+'</span></figcaption></figure>').join("")+'</div>';
+  } else if(v.type==="versus"){
+    const col=(c,cls)=>'<div class="vs-col '+cls+'"><h4>'+esc(c.h)+'</h4><div class="vs-items">'+c.items.map(([img,n])=>'<div class="vs-it"><img loading="lazy" src="fig/k_'+img+'.jpg" alt="'+esc(n)+'" width="200" height="200"><span>'+esc(n)+'</span></div>').join("")+'</div><ul>'+c.points.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>';
+    body = '<div class="vs">'+col(v.good,"good")+col(v.bad,"bad")+'</div>';
+  } else if(v.type==="vs2"){
+    const side=s=>{ const cols=["var(--leaf)","var(--sun)","var(--line)"];
+      const fig='<div class="v2-body">'+s.bar.map((b,i)=>[b[0],b[1],i]).reverse().map(([n,pc,i])=>'<div style="height:'+pc+'%;background:'+cols[i]+'"><span>'+(i===2?"":esc(n))+'</span></div>').join("")+'</div>';
+      return '<div class="v2-col '+s.cls+'"><h4>'+esc(s.h)+'</h4>'+fig+'<ul>'+s.items.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>'; };
+    body = '<div class="v2"><div class="v2-w">50 kg</div>'+side(v.left)+side(v.right)+'</div>';
+  } else if(v.type==="stack"){
+    body = '<div class="stk-key">'+v.keys.map(([n,c])=>'<span><i style="background:'+c+'"></i>'+esc(n)+'</span>').join("")+'</div><div class="stk">'+
+      v.rows.map(([n,vals])=>'<div class="stk-row"><span>'+esc(n)+'</span><div class="stk-bar">'+vals.map((x,j)=>'<i style="width:'+x+'%;background:'+v.keys[j][1]+'">'+(x>=12?x:'')+'</i>').join("")+'</div></div>').join("")+'</div>';
+  } else if(v.type==="artery"){
+    const plaque=[0,0.18,0.42,0.7];
+    body = '<div class="art">'+v.stages.map((s,k)=>{ const r=34, inner=r-8, pl=plaque[k]*inner;
+      return '<figure><svg viewBox="0 0 90 90" aria-hidden="true"><circle cx="45" cy="45" r="'+r+'" fill="var(--tissue)"/><circle cx="45" cy="45" r="'+inner+'" fill="var(--bad-soft)"/>'+
+        (pl?'<path d="M'+(45-inner)+' 45 A'+inner+' '+inner+' 0 0 1 '+(45+inner)+' 45 Z" fill="#f2d16b" transform="rotate(200 45 45) translate(0 '+(inner-pl)*0.0+')" opacity=".95"/>':'')+
+        '<circle cx="'+45+'" cy="'+(45-pl*0.55)+'" r="'+Math.max(3,inner-pl)+'" fill="var(--bad)"/></svg><figcaption>'+esc(s)+'</figcaption></figure>'; }).join("")+'</div>'+
+      '<div class="art-key"><span><i style="background:var(--bad)"></i>'+T("血液流通的空间")+'</span><span><i style="background:#f2d16b"></i>'+T("脂肪斑块")+'</span></div>';
+  } else if(v.type==="bodyfat"){
+    const max=45;
+    body = '<div class="bf">'+v.rows.map(r=>'<div class="bf-row"><b>'+esc(r.h)+'</b><div class="bf-bar">'+r.segs.map(([n,a,z,c])=>'<div class="bf-seg '+c+'" style="left:'+(a/max*100)+'%;width:'+((Math.min(z,max)-a)/max*100)+'%"><span>'+esc(n)+'</span><small>'+a+(z>=40?'%+':'–'+z+'%')+'</small></div>').join("")+'</div></div>').join("")+'</div>';
+  } else if(v.type==="photos"){
+    body = '<div class="phs">'+v.items.map(([f,c])=>{ const s=FIGSZ[f]||[1000,300]; return '<figure><button type="button" data-zoom="fig/'+f+'.jpg" aria-label="'+T("放大查看：")+esc(c)+'"><img loading="lazy" src="fig/'+f+'.jpg" alt="'+esc(c)+'" width="'+s[0]+'" height="'+s[1]+'"></button><figcaption>'+esc(c)+'</figcaption></figure>'; }).join("")+'</div>';
+  } else if(v.type==="ratio"){
+    body = '<div class="rt">'+v.parts.map(([n,pc,d,c])=>'<div class="rt-p" style="flex:'+pc+';background:'+c+'"><b>'+pc+'%</b><span>'+esc(n)+'</span></div>').join("")+'</div><div class="rt-d">'+v.parts.map(([n,pc,d,c])=>'<div><i style="background:'+c+'"></i><b>'+esc(n)+'</b>：'+esc(d)+'</div>').join("")+'</div>';
+  } else if(v.type==="burn"){
+    const mx=Math.max(...v.items.map(x=>x[3]));
+    body = '<div class="burn">'+v.items.map(([f,k,ex,m])=>'<div class="burn-row"><div class="burn-f"><b>'+esc(f)+'</b><span>'+k+' kcal</span></div><div class="burn-ar">→</div><div class="burn-e"><div class="burn-top"><span>'+esc(ex)+'</span><b>'+m+T(' 分钟')+'</b></div><div class="burn-bar"><i style="width:'+(m/mx*100)+'%"></i></div></div></div>').join("")+'</div>';
+  } else if(v.type==="mealdays"){
+    body = '<div class="md">'+v.days.map(d=>'<div class="md-day '+(d.hi?'hi':'lo')+'"><div class="md-h"><b>'+esc(d.h)+'</b><span>'+esc(d.total)+'</span></div><div class="md-meals">'+d.meals.map(([img,lab,k])=>'<div class="md-m">'+(img?'<img loading="lazy" src="fig/m_'+img+'.jpg" alt="" width="160" height="160">':'<i>'+T('不吃')+'</i>')+'<small>'+esc(lab)+'</small><em class="'+(parseInt(k)>=400?'hi':'')+'">'+esc(k)+'</em></div>').join("")+'</div></div>').join("")+'</div>';
+  } else if(v.type==="cmp2"){
+    body = '<div class="c2">'+v.rows.map(r=>'<div class="c2-row"><div class="c2-h">'+esc(r.h)+'</div><div class="c2-cols"><div class="c2-a"><small>'+esc(v.a)+'</small>'+r.a.map(x=>'<div><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join("")+'</div><div class="c2-b"><small>'+esc(v.b)+'</small><div><span>'+esc(r.b[0])+'</span><b>'+esc(r.b[1])+'</b></div></div></div></div>').join("")+'</div>';
+  } else if(v.type==="ricebowl"){
+    body = '<div class="rb"><div class="rb-base"><img loading="lazy" src="fig/k_'+v.base[0]+'.jpg" alt="'+esc(v.base[1])+'" width="260" height="260"><div><b>'+esc(v.base[1])+'</b><span>'+esc(v.base[2])+'</span></div></div>'+
+      '<div class="rb-eq">'+T('≈ 差不多等于 ≈')+'</div><div class="rb-items">'+v.items.map(([n,k,img])=>'<div class="rb-it">'+(img?'<img loading="lazy" src="fig/k_'+img+'.jpg" alt="'+esc(n)+'" width="320" height="200">':'')+'<div class="rb-tx"><span>'+esc(n)+'</span><b>'+esc(k)+'<small> kcal</small></b></div></div>').join("")+'</div></div>';
+  } else if(v.type==="caltable"){
+    const tier = k=> k>=450?"hi":k>=200?"mid":"lo";
+    body = '<div class="ct"><div class="ct-tabs" role="tablist">'+v.tabs.map((tb,i)=>'<button type="button" role="tab" class="ct-tab'+(i?'':' on')+'" data-ct="'+i+'" aria-selected="'+(i?'false':'true')+'">'+esc(tb.name)+'</button>').join("")+'</div>'+
+      v.tabs.map((tb,i)=>'<div class="ct-panel" data-ctp="'+i+'"'+(i?' hidden':'')+'>'+tb.rows.map(([n,por,k])=>'<div class="ct-row"><div class="ct-name"><span>'+esc(n)+'</span><small>'+esc(por)+'</small></div><div class="ct-bar"><i class="'+tier(k)+'" style="width:'+Math.max(2,Math.min(100,k/700*100))+'%"></i></div><b class="ct-k '+tier(k)+'">'+k+'</b></div>').join("")+
+      '<div class="ct-note">'+esc(tb.note)+'</div></div>').join("")+
+      '<div class="ct-key"><span><i class="lo"></i>'+T("低于 200")+'</span><span><i class="mid"></i>200–449</span><span><i class="hi"></i>'+T("450 以上 kcal")+'</span></div></div>';
+  } else if(v.type==="recap"){
+    body = '<div class="recap">'+DAYS.slice(0,20).map((d,i)=>'<div><em>'+(i+1)+'</em><span>'+esc(d.t)+'</span></div>').join("")+'</div>';
+  }
+  return '<div class="viz"><div class="viz-title">'+esc(v.title)+'</div>'+body+(v.note?'<div class="viz-note">'+esc(v.note)+'</div>':'')+'</div>';
+}
+
+
+/* ===== src/app/js-app/05-lesson-page.js ===== */
+function lessonHTML(n){
+  const d = DAYS[n-1], s = state(n);
+  let h = '<div class="lesson-head"><div class="daytag"><span class="d">'+DN(n)+'</span><span class="chip">'+esc(d.tag)+'</span>'+(preview && s==="locked"?'<span class="chip">'+T('预览')+'</span>':'')+'</div>'+
+    '<h2>'+esc(d.t)+'</h2>'+(LANG==="zh"&&d.en?'<div class="en">'+esc(d.en)+'</div>':'')+'</div>'+
+    '<div class="tts" id="tts"><button type="button" class="tts-btn" id="ttsPlay">'+T('▶ 听讲解')+'</button><button type="button" class="tts-btn ghost" id="ttsStop" hidden>'+T('■ 停止')+'</button><label class="tts-rate" for="ttsRate">'+T('语速')+'<select id="ttsRate"><option value="0.85">'+T('慢')+'</option><option value="1" selected>'+T('正常')+'</option><option value="1.2">'+T('快')+'</option></select></label><span class="tts-msg" id="ttsMsg" aria-live="polite"></span></div>'+
+    hookHTML(n)+(d.leadHL?'<div class="lead-hl"><span>'+T('今日重点')+'</span><p>'+esc(d.lead)+'</p></div>':'<p class="lead">'+esc(d.lead)+'</p>')+'<p class="intro">'+esc(d.intro)+'</p>';
+  h += '<section class="sec"><h3>'+T('今天要知道的 {0} 件事', d.points.length)+'</h3><ol class="points">'+d.points.map((p,pi)=>'<li data-pi="'+pi+'"><div><b>'+esc(p.h)+'</b><span class="pt">'+esc(p.p)+'</span>'+(p.list?'<ul class="sub">'+p.list.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>':'')+(p.after?'<span class="pt pt-after">'+esc(p.after)+'</span>':'')+foodsHTML(p.foods)+(p.viz?'<div class="pviz">'+p.viz.map(vizHTML).join("")+'</div>':'')+figsHTML(p.img,p.imgFull)+'</div></li>').join("")+'</ol></section>';
+  if(d.viz && d.viz.length) h += '<section class="sec"><h3>'+T('图解')+'</h3>'+d.viz.map(vizHTML).join("")+'</section>';
+  h += '<div class="fact"><div class="num">'+esc(d.fact.num)+(d.fact.unit?'<small>'+esc(d.fact.unit)+'</small>':'')+'</div><p>'+esc(d.fact.text)+'</p></div>';
+  if(d.slides && d.slides.length) h += '<section class="sec"><h3>'+T('课堂讲义')+'</h3><div class="slides">'+d.slides.map(sl=>
+    '<figure class="slide"><button type="button" data-zoom="img/'+sl.src+'.jpg" aria-label="'+T("放大查看：")+esc(sl.cap)+'"><img loading="lazy" src="img/'+sl.src+'.jpg" alt="'+esc(sl.cap)+'" width="1281" height="720"></button><figcaption>'+esc(sl.cap)+T(' · 点击放大')+'</figcaption></figure>').join("")+'</div></section>';
+  if(d.philo){ const ps=FIGSZ.philosophy||[867,598]; h += '<section class="philo"><div class="eyebrow">'+T('康宝莱均衡营养')+'</div><p>'+esc(d.philo)+'</p><button type="button" data-zoom="fig/philosophy.jpg" aria-label="'+T('放大查看：')+T('康宝莱均衡营养')+'"><img loading="lazy" src="fig/philosophy.jpg" alt="'+T('康宝莱均衡营养：30% 蛋白质、40% 醣类、30% 脂肪，加上纤维素、水分、睡眠和运动')+'" width="'+ps[0]+'" height="'+ps[1]+'"></button></section>'; }
+  h += '<section class="sec"><h3>'+T('常见误区')+'</h3><div class="myth"><div class="m"><span class="k">'+T('误区')+'</span><p>'+esc(d.myth.m)+'</p></div><div class="f"><span class="k">'+T('真相')+'</span><p>'+esc(d.myth.f)+'</p></div></div></section>';
+  h += '<section class="sec"><h3>'+T('实用小技巧')+'</h3><ul class="tips">'+d.tips.map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul></section>';
+  if(d.share) h += '<div class="share"><div class="eyebrow">'+T('想一想，分享出去')+'</div><div class="sq">'+esc(d.share)+'</div><p>'+T('把今天学到的内容分享给他，邀请他一起变健康。')+'</p></div>';
+  h += '<div class="task"><div class="eyebrow">'+T('今日小任务')+'</div><p>'+esc(d.task)+'</p>'+
+    (d.calc==="protein"||d.calc===true?'<div class="calc"><label for="goal">'+T('我的目标')+'</label><select id="goal"><option value="1.2,1.6">'+T('减重')+'</option><option value="1.6,2.2">'+T('增重')+'</option><option value="0.8,1.2">'+T('维持体重')+'</option></select><label for="wt">'+T('体重')+'</label><input id="wt" data-k="protein" type="number" inputmode="decimal" min="25" max="250" placeholder="60">'+T(' 公斤 → 每天约 ')+'<output id="wtOut">72–96</output>'+T(' 克蛋白质')+'</div>':'')+
+    (d.calc==="water"?'<div class="calc"><label for="wt">'+T('我的体重')+'</label><input id="wt" data-k="water" type="number" inputmode="decimal" min="25" max="250" placeholder="60">'+T(' 公斤 → 每天约 ')+'<output id="wtOut">'+T('{0}–{1} 公升（约 {2}–{3} 杯）','2.4','3.0',6,8)+'</output></div>':'')+'</div>';
+  if(d.template){ const tp=d.template;
+    h += '<section class="tmpl"><div class="eyebrow">'+T('拍照模板')+'</div><h3>'+esc(tp.title)+'</h3><button type="button" data-zoom="fig/'+tp.img+'.jpg" aria-label="'+T("放大查看：")+esc(tp.title)+'"><img loading="lazy" src="fig/'+tp.img+'.jpg" alt="'+esc(tp.title)+'" width="960" height="960"></button><ol>'+tp.tips.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ol><p>'+esc(tp.note)+'</p></section>'; }
+  if(s==="today"){
+    h += '<div class="actions"><button class="btn" id="finishBtn" type="button">'+T('我已读完第 {0} 天', n)+'</button><p class="note">'+(n<LIMIT?T('按下后，第 {0} 天会在明天凌晨 00:00 解锁。', n+1):T('按下后就完成全部 21 天课程。'))+'</p></div>';
+  } else if(s==="done"){
+    h += '<p class="note">'+T('你在 {0} 读完了这一天。', done[n])+'</p>';
+  }
+  return h;
+}
+
+
+/* ===== src/app/js-app/06-header-calendar.js ===== */
+function renderHeader(){
+  const count = Object.keys(done).filter(k=>done[k]).length;
+  document.getElementById("progNum").innerHTML = count + "<small>"+T(" / 21 天")+"</small>";
+  const bar = document.getElementById("bar"); bar.innerHTML = "";
+  if(COURSE_DAYS!==21) bar.style.gridTemplateColumns = "repeat("+COURSE_DAYS+",1fr)";
+  for(let n=1;n<=COURSE_DAYS;n++){ const i = document.createElement("i"); if(done[n]) i.className="on"; bar.appendChild(i); }
+  const st = document.getElementById("status"), nd = nextDay();
+  if(preview) { st.innerHTML = (ME && ME.fullAccess) ? T("教练权限：21 天全部开放，可以随时看任何一天。") : T("管理员预览：21 天全部打开，进度不会被记录。"); return; }
+  if(nd===null) st.innerHTML = T("恭喜你完成全部 21 天课程！")+(ME&&ME.accessUntil?T("你可以回看到 {0}，之后课程会关闭。", "<b>"+fmtDate(ME.accessUntil)+"</b>"):"");
+  else if(isUnlocked(nd)) st.innerHTML = T("今天可以阅读：")+"<b>"+DN(nd)+"</b> · "+esc(DAYS[nd-1].t);
+  else st.innerHTML = T("今天的已经读完了。{0} 将在 {1} 后解锁", DN(nd), "<b class=\"cd\">"+fmt(msToMidnight())+"</b>");
+}
+
+function renderCal(){
+  const cal = document.getElementById("cal"); cal.innerHTML = "";
+  // 21-day course: 3 rows of 7 (weeks). 10-day course: 2 rows of 5.
+  const per = COURSE_DAYS===10 ? 5 : 7, rows = Math.ceil(COURSE_DAYS/per);
+  const names = (COURSE_DAYS===10 ? ["第一部分 · 营养基础","第二部分 · 吃对与动起来"] : ["第一周 · 营养基础","第二周 · 吃对与动起来","第三周 · 持续与提升"]).map(x=>T(x));
+  for(let w=0; w<rows; w++){
+    const lab = document.createElement("div"); lab.className="week-label";
+    lab.innerHTML = "<span>"+names[w]+"</span><span>"+T("Day")+" "+(w*per+1)+"–"+(w*per+per)+"</span>";
+    const row = document.createElement("div"); row.className = "week" + (per===5 ? " five" : "");
+    for(let k=1;k<=per;k++){
+      const n = w*per+k, s = state(n);
+      const b = document.createElement("button"); b.type="button"; b.id="day-"+n;
+      b.className = "tile "+s + (preview && s==="locked" ? " preview":"") + (selected===n?" sel":"");
+      b.innerHTML = '<span class="n">'+n+'</span><span class="s">'+(s==="done"?T("已读"):s==="today"?T("今天"):LOCK)+'</span>';
+      b.setAttribute("aria-label",DN(n)+(LANG==="zh"?"，":", ")+T(s==="done"?"已读完":s==="today"?"今天可读":"未解锁"));
+      b.addEventListener("click", ()=>{
+        selected = (s==="locked" && !preview && n<=LIMIT) ? nextDay() : n;
+        renderAll(); document.getElementById("lesson").scrollIntoView({behavior:"smooth",block:"start"});
+      });
+      row.appendChild(b);
+    }
+    cal.appendChild(lab); cal.appendChild(row);
+  }
+}
+
+
+/* ===== src/app/js-app/07-read-aloud.js ===== */
+/* ---------- 听讲解 (speech synthesis) ---------- */
+const TTS = { on:false, queue:[], idx:0, voice:null, rate:1 };
+function ttsVoice(){
+  if(!("speechSynthesis" in window)) return null;
+  const vs = speechSynthesis.getVoices();
+  const pick = l => vs.find(v=>v.lang && v.lang.replace("_","-").toLowerCase().startsWith(l));
+  if(LANG==="en") return pick("en-gb") || pick("en-us") || pick("en-au") || pick("en") || null;
+  if(LANG==="ms") return pick("ms-my") || pick("ms") || pick("id-id") || pick("id") || null;
+  return pick("zh-cn") || pick("cmn") || pick("zh-sg") || pick("zh-tw") || pick("zh-hk") || pick("zh") || null;
+}
+if("speechSynthesis" in window){ speechSynthesis.onvoiceschanged = ()=>{ TTS.voice = ttsVoice(); }; TTS.voice = ttsVoice(); }
+function ttsClean(s){
+  if(LANG!=="zh"){ const en = LANG==="en";
+    return String(s||"").replace(/≈/g, en?" about ":" kira-kira ").replace(/(\d)\s*[–-]\s*(\d)/g, en?"$1 to $2":"$1 hingga $2").replace(/kcal/gi, en?"calories":"kalori").replace(/g\/kg/gi, en?"grams per kilo":"gram sekilogram")
+      .replace(/(\d)\s*g\b/g, en?"$1 grams":"$1 gram").replace(/(\d)\s*ml\b/gi, en?"$1 millilitres":"$1 mililiter").replace(/→/g,", ").replace(/\+/g, en?" plus ":" tambah ").replace(/×/g, en?" times ":" darab ").replace(/[“”"()·•]/g," ").replace(/\s+/g," ").trim(); }
+  return String(s||"").replace(/≈/g,"约等于").replace(/(\d)\s*[–-]\s*(\d)/g,"$1到$2").replace(/kcal/gi,"卡路里").replace(/g\/kg/gi,"克每公斤")
+    .replace(/(\d)\s*g\b/g,"$1克").replace(/→|＋|\+/g,"，").replace(/[「」“”《》（）()·•]/g," ").replace(/\s+/g," ").trim();
+}
+function ttsSplit(s){ const out=[]; String(s).split(/(?<=[。！？；!?;]|\.\s)/).forEach(x=>{ x=x.trim(); while(x.length>(LANG==="zh"?140:220)){ let k = LANG==="zh"?140:x.lastIndexOf(" ",220); if(k<60) k=220; out.push(x.slice(0,k)); x=x.slice(k).trim(); } if(x) out.push(x); }); return out; }
+function ttsScript(n){
+  const d = DAYS[n-1], q = QS[n-1], parts = [];
+  const add = (text, pi) => ttsSplit(ttsClean(text)).forEach(s=>parts.push({s, pi}));
+  const zh = LANG==="zh", P = zh?"。":". ", end = x => /[。！？.!?:：]$/.test(String(x).trim()) ? x : x+P;
+  add(DN(n).replace(/ /g, zh?"":" ")+(zh?"，":". ")+end(d.t)); if(d.lead) add(d.lead); if(d.intro) add(d.intro);
+  if(q && q.q) add(T("先想一想：")+q.q+T(" 想好了，可以在页面上选出你的答案。"));
+  if(d.points){ add(end(T("今天要知道的 {0} 件事", d.points.length).replace(/ /g, zh?"":" "))); d.points.forEach((p,i)=>{ add(T("第{0}点，", i+1)+end(p.h), i); add(p.p, i); (p.list||[]).forEach(x=>add(end(x), i)); if(p.after) add(p.after, i); }); }
+  if(d.fact) add(T("关键数字：")+d.fact.num+(d.fact.unit||"")+P+d.fact.text);
+  if(d.myth) add(T("常见误区：")+d.myth.m+T(" 真相是：")+d.myth.f);
+  if(d.tips && d.tips.length) add(T("实用小技巧：")+d.tips.join(zh?"；":"; ")+P);
+  if(d.share) add(T("想一想：")+d.share);
+  if(d.task) add(T("今日小任务：")+d.task);
+  add(T("今天的讲解到这里，记得完成今日小任务。"));
+  return parts;
+}
+function ttsMark(pi){ document.querySelectorAll(".points>li.reading").forEach(x=>x.classList.remove("reading")); if(pi!==undefined){ const li = document.querySelector('.points>li[data-pi="'+pi+'"]'); if(li) li.classList.add("reading"); } }
+function ttsUI(){ const a=document.getElementById("ttsPlay"), b=document.getElementById("ttsStop"); if(!a) return; a.textContent = TTS.on ? (TTS.paused ? T("▶ 继续") : T("❚❚ 暂停")) : T("▶ 听讲解"); b.hidden = !TTS.on; }
+// iPhone/Safari notes: speak() must start inside the tap; calling cancel() right before speak() can silently drop it;
+// pause()/resume() are unreliable, so "pause" = stop and remember the sentence; keep a reference to the utterance so onend fires.
+function ttsHush(){ try{ if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel(); }catch(e){} }
+// iPhone Safari: speech always follows the Silent switch (tested; no web workaround). Chrome on iPhone is not affected.
+const IOS_SAFARI = /iP(hone|ad|od)/.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent);
+function ttsStop(){ TTS.on = false; TTS.paused = false; TTS.queue = []; clearTimeout(TTS.watch); TTS.cur = null; ttsHush(); ttsMark(); ttsUI(); }
+function ttsNext(){
+  if(!TTS.on || TTS.paused) return;
+  if(TTS.idx >= TTS.queue.length){ ttsStop(); const m=document.getElementById("ttsMsg"); if(m) m.textContent = T("讲解完毕"); return; }
+  const c = TTS.queue[TTS.idx++]; ttsMark(c.pi);
+  const u = new SpeechSynthesisUtterance(c.s); u.lang = (TTS.voice && TTS.voice.lang) || ({zh:"zh-CN",en:"en-GB",ms:"ms-MY"})[LANG]; if(TTS.voice) u.voice = TTS.voice; u.rate = TTS.rate;
+  TTS.cur = u; TTS.started = false;
+  u.onstart = ()=>{ TTS.started = true; clearTimeout(TTS.watch); const m=document.getElementById("ttsMsg"); if(m && m.dataset.hint) { m.textContent = ""; delete m.dataset.hint; } };
+  u.onend = ()=>{ if(TTS.cur===u) ttsNext(); };
+  u.onerror = e=>{ if(TTS.cur===u && e.error!=="interrupted" && e.error!=="canceled") ttsNext(); };
+  speechSynthesis.speak(u);
+  clearTimeout(TTS.watch);
+  TTS.watch = setTimeout(()=>{ if(TTS.on && !TTS.paused && TTS.cur===u && !TTS.started && !speechSynthesis.speaking){ const m=document.getElementById("ttsMsg"); if(m){ m.textContent = T("没有声音？iPhone 请关掉静音模式（侧边静音键），或改用 Chrome 打开。"); m.dataset.hint = "1"; } } }, 2500);
+}
+function ttsBind(n){
+  const a=document.getElementById("ttsPlay"); if(!a) return;
+  const m=document.getElementById("ttsMsg"), r=document.getElementById("ttsRate");
+  if(!("speechSynthesis" in window)){ a.disabled = true; m.textContent = T("这个浏览器不支持朗读"); return; }
+  r.value = String(TTS.rate); r.onchange = ()=>{ TTS.rate = parseFloat(r.value); if(TTS.on && !TTS.paused){ TTS.idx = Math.max(0,TTS.idx-1); TTS.cur = null; ttsHush(); ttsNext(); } };
+  a.onclick = ()=>{
+    if(!TTS.on){ TTS.voice = ttsVoice(); m.textContent = TTS.voice ? "" : T("找不到中文语音，可能会用其他语言的声音朗读");
+      TTS.on = true; TTS.paused = false; TTS.queue = ttsScript(n); TTS.idx = 0; TTS.cur = null; ttsHush(); ttsNext(); }
+    else if(TTS.paused){ TTS.paused = false; TTS.idx = Math.max(0,TTS.idx-1); ttsNext(); }
+    else { TTS.paused = true; TTS.cur = null; clearTimeout(TTS.watch); ttsHush(); }
+    ttsUI();
+  };
+  document.getElementById("ttsStop").onclick = ttsStop;
+  if(IOS_SAFARI && !m.textContent){ m.textContent = T("iPhone 用 Safari：请先关掉静音模式才有声音，或改用 Chrome 打开。"); m.dataset.ios = "1"; }
+  ttsUI();
+}
+
+/* ===== src/app/js-app/08-show-lesson.js ===== */
+function renderLesson(){
+  ttsStop();
+  const el = document.getElementById("lesson"), nd = nextDay();
+  if(selected===null) selected = nd===null ? LIMIT : nd;
+  const n = selected, s = state(n);
+  if(s==="locked" && !preview && n > LIMIT){
+    el.className = "lesson locked-card";
+    el.innerHTML = '<div class="eyebrow">'+T('尚未开放')+'</div><h2>'+DN(n)+'</h2><p class="lead">'+T('你的课程开放到第 {0} 天。想继续看，请联系你的教练。', LIMIT)+'</p>';
+    return;
+  }
+  if(s==="locked" && !preview){
+    el.className = "lesson locked-card";
+    el.innerHTML = done[n-1]
+      ? '<div class="eyebrow">'+T('下一则资讯')+'</div><h2>'+T('{0} · 明天见', DN(n))+'</h2><p class="lead">'+T('今天的内容已经读完了，给身体一点时间消化。')+'</p><p>'+T('{0} 将在', DN(n))+'</p><div class="clock cd">'+fmt(msToMidnight())+'</div><p class="note">'+T('后解锁（明天 00:00）')+'</p><p class="peek">'+T('明天的主题：')+'<b>'+esc(DAYS[n-1].t)+'</b><br>'+T('完成的内容可以随时点上面的绿色格子回看。')+'</p>'
+      : '<div class="eyebrow">'+T('尚未解锁')+'</div><h2>'+DN(n)+'</h2><p class="lead">'+T('请先读完前一天的内容。')+'</p>';
+    return;
+  }
+  if(!DAYS[n-1]._full){
+    el.className = "lesson"; el.innerHTML = '<p class="note">'+T('正在载入 {0}…', DN(n))+'</p>';
+    const lg = LANG; api("/lesson?day="+n+"&lang="+lg).then(d=>{ if(lg!==LANG) return; Object.assign(DAYS[n-1], d.day, {_full:true}); QS[n-1] = d.question; if(selected===n) renderLesson(); })
+      .catch(e=>{ if(e.code==="expired"||e.code==="pending"||e.status===401) boot(); else el.innerHTML = '<p class="note">'+esc(e.message)+'</p>'; });
+    return;
+  }
+  el.className = "lesson";
+  el.innerHTML = lessonHTML(n);
+  ttsBind(n);
+  const fb = document.getElementById("finishBtn");
+  if(fb) fb.addEventListener("click", ()=>{
+    fb.disabled = true; fb.textContent = T("正在记录…");
+    api("/done",{method:"POST",body:{day:n}}).then(d=>{
+      done = d.done; if(d.accessUntil && ME) ME.accessUntil = d.accessUntil;
+      const nx = nextDay(); selected = nx===null ? n : nx; renderAll(); renderUbar();
+      document.getElementById("lesson").scrollIntoView({behavior:"smooth",block:"start"});
+    }).catch(e=>{ fb.disabled=false; fb.textContent = e.message; });
+  });
+  el.querySelectorAll("[data-opt]").forEach(b=>b.addEventListener("click", ()=>{
+    answered[n] = +b.dataset.opt;
+    const hook = el.querySelector(".hook"); const tmp = document.createElement("div"); tmp.innerHTML = hookHTML(n);
+    hook.replaceWith(tmp.firstChild); bindOpts(); }));
+  function bindOpts(){ el.querySelectorAll("[data-opt]:not([disabled])").forEach(b=>b.addEventListener("click", ()=>{ answered[n] = +b.dataset.opt; renderLesson(); })); }
+  const wt = document.getElementById("wt"), goal = document.getElementById("goal");
+  const calc = ()=>{
+    const w = parseFloat(wt.value) || (wt.dataset.k==="protein" ? 60 : NaN);
+    const ok = w>=25 && w<=250, water = wt.dataset.k==="water";
+    document.getElementById("wtOut").textContent = water ? (ok ? T("{0}–{1} 公升（约 {2}–{3} 杯）",(w*0.04).toFixed(1),(w*0.05).toFixed(1),Math.round(w*0.04/0.4),Math.round(w*0.05/0.4)) : T("{0}–{1} 公升（约 {2}–{3} 杯）","2.4","3.0",6,8)) : (()=>{ const [a,b]=(goal?goal.value:"0.8,1.2").split(",").map(Number); return ok ? Math.round(w*a)+"–"+Math.round(w*b) : "—"; })();
+  };
+  if(wt) wt.addEventListener("input", calc);
+  if(goal) goal.addEventListener("change", calc);
+  el.querySelectorAll("[data-ct]").forEach(b=>b.addEventListener("click", ()=>{
+    const box = b.closest(".ct"), i = b.dataset.ct;
+    box.querySelectorAll("[data-ct]").forEach(x=>{ const on = x.dataset.ct===i; x.classList.toggle("on",on); x.setAttribute("aria-selected",on?"true":"false"); });
+    box.querySelectorAll("[data-ctp]").forEach(pn=>{ pn.hidden = pn.dataset.ctp!==i; });
+  }));
+  el.querySelectorAll("[data-zoom]").forEach(b=>b.addEventListener("click", ()=>{
+    document.getElementById("lbImg").src = b.dataset.zoom;
+    document.getElementById("lbImg").alt = b.getAttribute("aria-label");
+    document.getElementById("lb").hidden = false;
+  }));
+}
+function renderAll(){ renderHeader(); renderCal(); renderLesson(); }
+
+const lb = document.getElementById("lb");
+document.getElementById("lbClose").addEventListener("click", ()=>{ lb.hidden = true; });
+lb.addEventListener("click", e=>{ if(e.target===lb) lb.hidden = true; });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") lb.hidden = true; });
+
+
+/* ===== src/app/js-app/09-protection.js ===== */
+function fmtDate(iso){ const d = new Date(Date.parse(iso)+8*3600e3); return langDate(d.getUTCFullYear(), d.getUTCMonth()+1, d.getUTCDate()); }
+
+/* ---------- protection ---------- */
+let WM_TEXT = "";
+function setWatermark(text){
+  if(text!==undefined) WM_TEXT = text; if(!WM_TEXT) return;
+  const c = document.createElement("canvas"); c.width = 360; c.height = 220; const g = c.getContext("2d");
+  g.translate(180,110); g.rotate(-0.42); g.textAlign = "center"; g.fillStyle = "rgba(120,120,120,0.2)";
+  g.font = "700 15px sans-serif"; g.fillText(T("仅供内部训练使用"), 0, -22);
+  g.font = "600 14px sans-serif"; g.fillText(WM_TEXT, 0, 0); g.fillText(today(), 0, 22);
+  document.getElementById("wm").style.backgroundImage = "url("+c.toDataURL()+")";
+}
+const shield = document.getElementById("shield");
+const hide = ()=>{ shield.hidden = false; };
+const show = ()=>{ shield.hidden = true; };
+window.addEventListener("blur", hide); window.addEventListener("focus", show);
+document.addEventListener("visibilitychange", ()=>{ document.hidden ? hide() : show(); });
+["contextmenu","copy","cut","dragstart","selectstart"].forEach(ev=>document.addEventListener(ev, e=>{ if(!(e.target.closest && e.target.closest("input,textarea"))) e.preventDefault(); }));
+document.addEventListener("keydown", e=>{
+  const k = (e.key||"").toLowerCase();
+  if(k==="printscreen"){ hide(); try{ navigator.clipboard.writeText(""); }catch(_){} setTimeout(show, 1500); e.preventDefault(); }
+  if((e.ctrlKey||e.metaKey) && ["p","s","u"].includes(k)){ e.preventDefault(); }
+  if((e.ctrlKey||e.metaKey) && k==="c" && !(e.target.closest && e.target.closest("input"))){ e.preventDefault(); }
+  if((e.ctrlKey||e.metaKey) && e.shiftKey && ["3","4","5","s","i"].includes(k)){ hide(); setTimeout(show,1500); }
+});
+
+
+/* ===== src/app/js-app/10-login-screens.js ===== */
+/* ---------- gate screens ---------- */
+const gate = document.getElementById("gate"), app = document.getElementById("app");
+let lastGate = null;
+function showGate(html){ app.hidden = true; gate.hidden = false; gate.innerHTML = '<div class="auth"><div class="topline"><div class="eyebrow">'+T("21 DAYS · 每天一则健康资讯")+'</div>'+langSwitchHTML()+'</div><h1>'+T("21天健康营养课")+'</h1>'+html+'<p class="note">'+T("声明：本课程内容仅供内部训练使用，版权所有。未经许可，请勿截图、转发、复制或公开分享。")+'</p><p class="note admin-entry"><a class="linkbtn" href="/admin.html">'+T("管理员入口")+'</a></p></div>'; }
+function logout(){ api("/logout",{method:"POST"}).catch(()=>{}); try{ localStorage.removeItem("h21_token"); }catch(e){} TOKEN = null; ME = null; boot(); }
+function authForm(mode, msg){
+  const reg = mode==="register"; lastGate = ()=>authForm(mode, msg);
+  showGate('<div class="tabs"><button type="button" id="tLogin" class="'+(reg?'':'on')+'">'+T('登录')+'</button><button type="button" id="tReg" class="'+(reg?'on':'')+'">'+T('注册')+'</button></div>'+
+    '<form id="f" class="form" novalidate>'+
+    (reg?'<label for="fName">'+T('名字')+'</label><input id="fName" autocomplete="name" required>':'')+
+    '<label for="fPhone">'+T('电话号码')+'</label><input id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="'+T('例如 0123456789')+'" required>'+
+    '<label for="fPw">'+T('密码（至少 6 个字）')+'</label><input id="fPw" type="password" autocomplete="'+(reg?'new-password':'current-password')+'" required>'+
+    (reg?'<label for="fPw2">'+T('再输入一次密码')+'</label><input id="fPw2" type="password" autocomplete="new-password" required>':'')+
+    '<label class="showpw"><input type="checkbox" id="showPw"> '+T('显示密码')+'</label><p class="ferr" id="ferr" role="alert">'+esc(msg?T(msg):"")+'</p><button class="btn" type="submit">'+(reg?T('提交注册'):T('登录'))+'</button>'+
+    '<p class="note">'+(reg?T('注册后需要教练审核，审核通过后就可以开始 21 天课程。'):T('还没有账号？点上面的「注册」。忘记密码请联系你的教练。'))+'</p>'+'</form>');
+  document.getElementById("showPw").onchange = e=>{ ["fPw","fPw2"].forEach(id=>{ const x = document.getElementById(id); if(x) x.type = e.target.checked ? "text" : "password"; }); };
+  document.getElementById("tLogin").onclick = ()=>authForm("login");
+  document.getElementById("tReg").onclick = ()=>authForm("register");
+  document.getElementById("f").onsubmit = async e=>{
+    e.preventDefault(); const er = document.getElementById("ferr"); er.textContent = "";
+    const btn = e.target.querySelector(".btn"); btn.disabled = true;
+    const phone = document.getElementById("fPhone").value, password = document.getElementById("fPw").value;
+    try{
+      if(reg){
+        const name = document.getElementById("fName").value;
+        if(password !== document.getElementById("fPw2").value){ er.textContent = T("两次输入的密码不一样"); btn.disabled = false; return; }
+        await api("/register",{method:"POST",body:{name,phone,password,course:COURSE_DAYS}});
+      }
+      const d = await api("/login",{method:"POST",body:{phone,password}});
+      TOKEN = d.token; try{ localStorage.setItem("h21_token", TOKEN); }catch(_){}
+      boot();
+    }catch(x){ er.textContent = x.message; btn.disabled = false; }
+  };
+}
+function statusScreen(u){ lastGate = ()=>statusScreen(u);
+  const msg = {
+    pending:['等待教练审核','你的注册已经收到。教练审核通过后，你就可以开始 21 天课程。'],
+    rejected:['注册未通过','请联系你的教练了解详情。'],
+    disabled:['账号已停用','请联系你的教练。'],
+    renew_requested:['已申请重新开通','教练批准后，你就可以再次阅读课程内容。']
+  };
+  let h, p, extra = "";
+  if(u.status==="approved" && u.expired){ h = "课程已结束"; p = "你已完成 21 天课程，回看期（完成后 7 天）已经结束。想再看一次，可以申请重新开通，教练批准后就能继续。"; extra = '<button class="btn" id="renew" type="button">'+T('申请重新开通')+'</button>'; }
+  else { [h,p] = msg[u.status] || ['无法使用','请联系你的教练。']; }
+  h = T(h); p = T(p);
+  showGate('<div class="stbox"><h2>'+esc(h)+'</h2><p>'+esc(p)+'</p>'+extra+'<button class="linkbtn" id="refresh" type="button">'+T('重新检查')+'</button><button class="linkbtn" id="lo" type="button">'+T('登出（{0}）', esc(u.name))+'</button></div>');
+  document.getElementById("refresh").onclick = boot; document.getElementById("lo").onclick = logout;
+  const r = document.getElementById("renew"); if(r) r.onclick = async ()=>{ r.disabled = true; try{ await api("/renew",{method:"POST"}); boot(); }catch(e){ r.textContent = e.message; } };
+}
+function renderUbar(){
+  const ub = document.getElementById("ubar");
+  ub.innerHTML = (preview && !ME) ? '<span>'+T('管理员预览')+'</span><a class="linkbtn" href="/admin.html">'+T('返回管理后台')+'</a>'
+    : '<span>'+esc(ME.name)+(ME.accessUntil?T(' · 可回看到 {0}', fmtDate(ME.accessUntil)):'')+'</span><button class="linkbtn" id="lo2" type="button">'+T('登出')+'</button>';
+  const b = document.getElementById("lo2"); if(b) b.onclick = logout;
+}
+
+/* ===== src/app/js-app/11-start.js ===== */
+// count one page open per load (for the admin statistics tab); the device id is random, not personal
+let HIT_SENT = false;
+function sendHit(){
+  if(HIT_SENT) return; HIT_SENT = true;
+  let dev = null; try{ dev = localStorage.getItem("h21_dev"); if(!dev){ dev = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("h21_dev", dev); } }catch(e){}
+  api("/hit",{method:"POST",body:{device:dev||"", lang:LANG}}).catch(()=>{});
+}
+// shortcut to the admin console on devices where the admin has logged in (shows how many are waiting)
+async function adminShortcut(){
+  if(isPreview) return;   // admin preview already has "返回管理后台" in the top bar
+  let at = null; try{ at = localStorage.getItem("h21_admin"); }catch(e){}
+  const old = document.getElementById("adminFab"); if(!at){ if(old) old.remove(); return; }
+  try{
+    const r = await fetch("/api/admin/users", {headers:{authorization:"Bearer "+at}}); if(!r.ok){ if(old) old.remove(); return; }
+    const users = (await r.json()).users || [];
+    const n = users.filter(u=>u.status==="pending" || u.status==="renew_requested").length;
+    const a = old || Object.assign(document.createElement("a"), {id:"adminFab", href:"/admin.html", className:"admin-fab"});
+    a.innerHTML = '管理后台' + (n ? ' <b>'+n+'</b>' : '');
+    a.setAttribute("aria-label", "管理后台" + (n ? "，"+n+" 人待审核" : ""));
+    if(!old) document.body.appendChild(a);
+  }catch(e){}
+}
+async function boot(){
+  sendHit(); adminShortcut();
+  if(!TOKEN && !isPreview){ document.getElementById("wm").style.backgroundImage = ""; authForm("login"); return; }
+  try{
+    const d = await api("/me?lang="+LANG);
+    SERVER_TODAY = d.today;
+    d.titles.slice(0,COURSE_DAYS).forEach((t,i)=>{ DAYS[i].t = t; });
+    // a customer opened the other course's link: send them to their own course
+    // days 1–10 → the 10-day page, more → the 21-day page
+    if(d.user){ const c = d.user.course||21, page = c<=10 ? 10 : 21; if(page!==COURSE_DAYS){ location.replace(page===10 ? "/10" : "/"); return; } LIMIT = Math.min(COURSE_DAYS, c); } else LIMIT = COURSE_DAYS;
+    if(d.admin){ preview = true; done = {}; setWatermark("管理员预览"); }
+    else {
+      ME = d.user; done = d.done || {}; preview = !!ME.fullAccess;
+      setWatermark(ME.name+" · "+ME.phone);
+      if(ME.status!=="approved" || ME.expired){ statusScreen(ME); return; }
+    }
+    gate.hidden = true; app.hidden = false; renderUbar(); selected = null; renderAll();
+  }catch(e){
+    if(e.status===401){
+      try{ localStorage.removeItem("h21_token"); }catch(_){} TOKEN = null;
+      if(isPreview){ lastGate = null; showGate('<p>'+T('管理员登录已过期，请回到管理后台重新登录。')+'</p>'); return; }
+      authForm("login", "登录已过期，或你的账号已在另一部设备登录。请重新登录。");
+    } else { lastGate = null; showGate('<p class="note">'+esc(e.message)+'</p><button class="btn" id="rt" type="button">'+T('重试')+'</button>'); document.getElementById("rt").onclick = boot; }
+  }
+}
+window.onLangChange = ()=>{ setWatermark(); DAYS.forEach(d=>{ d._full = false; }); if(!app.hidden){ renderAll(); renderUbar(); api("/me?lang="+LANG).then(d=>{ d.titles.slice(0,COURSE_DAYS).forEach((t,i)=>{ DAYS[i].t = t; }); renderAll(); }).catch(()=>boot()); } else if(lastGate) lastGate(); else boot(); };
+document.getElementById("langTop").innerHTML = langSwitchHTML();
+applyStatic();
+let lastDay = today();
+setInterval(()=>{
+  if(app.hidden) return;
+  const t = new Date(Date.now()+8*3600e3).toISOString().slice(0,10);
+  if(t!==lastDay){ lastDay = t; SERVER_TODAY = t; selected = null; renderAll(); return; }
+  document.querySelectorAll(".cd").forEach(x=> x.textContent = fmt(msToMidnight()));
+}, 1000);
+boot();
+
+</script>
+</body></html>
